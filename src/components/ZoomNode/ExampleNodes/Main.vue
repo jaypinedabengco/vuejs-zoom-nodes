@@ -2,19 +2,27 @@
 	div
 		h1 Selected
 		div
-			component(:is="getSelectedComponent")
+			component(:is="getSelectedComponent" v-model="nodeData")
 		div.selection-container
 			ul
 				li(v-for="(node, i) in getSelectedComponentDetails.children" :key="i", @click="selected = node.component") 
 					| {{node.label}} - {{node.children && node.children.length ? `(${node.children.length}) child`: `no child`}}
 			button(v-if="getSelectedParentComponentDetails", @click="selected = getSelectedParentComponentDetails.component") Go Back
-												
+
 		hr
-		h1 Target
+		h3 Component Names
+		pre
+			| {{getAllComponentNames}}
+		hr
+		h3 Data		
+		pre
+			| {{data}}												
+		hr
+		h3 Target
 		pre
 			| {{getSelectedComponentDetails}}
 		hr
-		h1 Parent
+		h3 Parent
 		pre
 			| {{getSelectedParentComponentDetails}}
 </template>
@@ -30,7 +38,7 @@ export default {
     "sample-one": Sample1,
     "sample-two": Sample2,
     "sample-three": Sample3,
-	"sample-three-child": Sample3Child,
+    "sample-three-child": Sample3Child
   },
   data() {
     return {
@@ -55,10 +63,26 @@ export default {
             ]
           }
         ]
-      }
+      },
+      data: {}
     };
   },
+  created() {
+    this.getAllComponentNames.forEach(key => {
+      this.$set(this.data, key, null);
+    });
+  },
   computed: {
+    nodeData: {
+      get() {
+        const selectedComponent = this.getSelectedComponent;
+        return this.data[selectedComponent];
+      },
+      set(value) {
+        const selectedComponent = this.getSelectedComponent;
+        this.data[selectedComponent] = value;
+      }
+    },
     getSelectedComponent() {
       return this.selected;
     },
@@ -116,6 +140,21 @@ export default {
 
       recursiveChecker(this.selected, [this.structure]);
       return result_container;
+    },
+
+    getAllComponentNames() {
+      const result_container = [];
+      const getComponentNames = components => {
+        if (components instanceof Array) {
+          const extracted_names = components.map(({ component }) => component);
+          result_container.push(...extracted_names);
+          components.forEach(component =>
+            getComponentNames(component.children, result_container)
+          );
+        }
+      };
+      getComponentNames([this.structure]);
+      return result_container;
     }
   }
 };
@@ -123,7 +162,12 @@ export default {
 
 <style scoped>
 .selection-container {
-	width: 300px;
-	margin: auto;
+  width: 300px;
+  margin: auto;
+}
+pre {
+  text-align: left;
+  width: 500px;
+  margin: auto;
 }
 </style>
