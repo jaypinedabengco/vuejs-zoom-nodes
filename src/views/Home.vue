@@ -1,18 +1,35 @@
-<template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+<template lang="pug">
+  div
+    component(:is="getSelectedComponent")
+    button(@click="onClickChangeButton") {{changeButtonLabel}}
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
+import ZoomNode from "@/components/ZoomNode/ZoomNode";
+import Node from "@/components/ZoomNode/Node";
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
-    HelloWorld
+    "zoom-node": ZoomNode,
+    node: Node
+  },
+  data() {
+    return {
+      selected: "zoom-node"
+    };
+  },
+  methods: {
+    onClickChangeButton() {
+      this.selected = this.selected === "zoom-node" ? "node" : "zoom-node";
+    }
+  },
+  computed: {
+    getSelectedComponent() {
+      return this.selected;
+    },
+    changeButtonLabel() {
+      return this.selected === "zoom-node" ? "node" : "zoom-node";
+    }
   }
-}
+};
 </script>
