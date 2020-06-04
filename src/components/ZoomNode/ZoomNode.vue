@@ -1,5 +1,8 @@
 <template lang="pug">
-	h1 Hello
+	div
+		h1 Hello
+		//- Start with show & hide here....
+		//- Then linked based on nodes.
 </template>
 
 <script>
