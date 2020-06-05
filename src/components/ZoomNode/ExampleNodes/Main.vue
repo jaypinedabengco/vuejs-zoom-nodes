@@ -4,7 +4,7 @@
 			div.main-circle(ref="mainCircleRef", 
 				@mouseover="disableBack = true", 
 				@mouseleave="disableBack = false")
-				component(:is="getSelectedComponent" v-model="nodeData")
+				component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
 				//- Sub circle & circle within them
 				//- This should be a component?
 				div.sub-circle(
@@ -118,7 +118,10 @@ export default {
         return styleCoordinates;
       }
       return null;
-    }
+    },
+    checkIfChanged() {
+		console.log('changed!');
+	}
   },
   computed: {
     nodeData: {
@@ -193,8 +196,7 @@ export default {
 
             // Start in Center
             //   Base X = left + (width / 2 )
-            child.coordinates.x =
-              mainCircleCoordinates.left + mainCircleCoordinates.width / 2;
+            child.coordinates.x = mainCircleCoordinates.width / 2;
 
             //   Base Y = top + (height / 2 )
             child.coordinates.y = mainCircleCoordinates.height / 2;
@@ -213,16 +215,16 @@ export default {
             const radius =
               mainCircleCoordinates.width / 2 + (childWidth - childWidth / 4);
 
-			console.log({ radius });
-			const unit = 200;
+            console.log({ radius });
+            // const unit = radius / 10;
             // minus (x)
             if (angle >= 0 && angle <= 180) {
-              child.coordinates.x = (baseX + radius) - (angle * radius) / unit;
+            //   child.coordinates.x = baseX + radius;
             }
 
             // minus (y)
             if (angle >= 0 && angle <= 90) {
-              child.coordinates.y = baseY - (angle * radius) / unit;
+            //   child.coordinates.y = baseY - angle;
             }
 
             // if (angle === 30) {
@@ -293,6 +295,7 @@ export default {
   position: relative;
 }
 .main-circle {
+  position: relative;
   width: 500px;
   height: 500px;
   border-radius: 50%;

@@ -11,6 +11,7 @@ export default {
 	methods: {
 		applyChange() {
 			this.$emit("input", this.mixinsVModel);
+			this.$emit("change", this.mixinsVModel);
 		}
 	}
 }
