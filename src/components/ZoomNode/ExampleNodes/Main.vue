@@ -3,7 +3,8 @@
 		div.container(@click="back")
 			div.main-circle(ref="mainCircleRef", 
 				@mouseover="disableBack = true", 
-				@mouseleave="disableBack = false")
+				@mouseleave="disableBack = false", 
+				:style="setViewStyle(getSelectedComponentDetails)")
 				component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
 				//- Sub circle & circle within them
 				//- This should be a component?
@@ -17,7 +18,7 @@
 						div.circle-grandchild-preview-container(
 								v-if="node.children" v-for="(node_child, j) in node.children", 
 								:style="{transform: `translate(-50%, -50%) rotate(${node_child.angle}deg)`}")
-							div.circle-grandchild(:style="{transform: `rotate(${node_child.angle}deg)`}")
+							div.circle-grandchild(:style="setGranChildCircleStyle(node_child)")
 						
 			//- div.sub-circle
 			//- 	div Label
@@ -71,28 +72,26 @@ export default {
         component: "sample-one",
         label: "Sample One",
         angle: 0,
+        preview_style: {
+          background: "red"
+        },
+        selected_view_style: {
+          background: "red"
+        },
         children: [
           {
             component: "sample-two",
             label: "Sample Two",
             angle: 0,
-            children: [
-              {
-                label: "Sample Three Child 1",
-                angle: 90,
-                component: "sample-three-child"
-              },
-              {
-                label: "Sample Three Child 2",
-                angle: 180,
-                component: "sample-three-child"
-              },
-              {
-                label: "Sample Three Child 3",
-                angle: 270,
-                component: "sample-three-child"
-              }
-            ]
+            preview_style: {
+              background: "blue"
+            },
+            dot_style: {
+              background: "blue"
+            },
+            selected_view_style: {
+              background: "blue"
+            }
           },
           {
             component: "sample-three",
@@ -100,26 +99,20 @@ export default {
             angle: 60,
             children: [
               {
-                label: "Sample Three Child 1",
-                angle: 120,
-                component: "sample-three-child"
-              },
-              {
-                label: "Sample Three Child 2",
-                angle: 0,
-                component: "sample-three-child"
-              },
-              {
                 label: "Sample Three Child 3",
                 angle: 90,
-                component: "sample-three-child"
+                component: "sample-three-child",
+                preview_style: {
+                  background: "yellow"
+                },
+                dot_style: {
+                  background: "yellow"
+                },
+                selected_view_style: {
+                  background: "yellow"
+                }
               }
             ]
-          },
-          {
-            label: "Sample Three Child",
-            angle: 32,
-            component: "sample-three-child"
           }
         ]
       },
@@ -143,36 +136,38 @@ export default {
         this.selected = this.getSelectedParentComponentDetails.component;
       }
     },
+    setViewStyle(node) {
+      const { selected_view_style = {} } = node;
+      const styleCoordinates = {
+        ...selected_view_style
+      };
+      return styleCoordinates;
+    },
     setChildCoordinateViaStyle(node) {
-      if (node.coordinates) {
-        const { distance, angle } = node;
-        const { x, y, parentWidth, nodeWidth } = node.coordinates;
+      const { angle, selected_style = {} } = node;
+      const transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 
-        // distance is 100px by default
-        let width = parentWidth + nodeWidth * 2 + (distance || 100);
-
-        const transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-
-        const styleCoordinates = {
-          left: `${x}px`,
-          top: `${y}px`,
-          width: `${width}px`,
-          transform
-        };
-        return styleCoordinates;
-      }
-      return null;
+      const styleCoordinates = {
+        transform,
+        ...selected_style
+      };
+      return styleCoordinates;
     },
     setChildSubCircleCoordinateViaStyle(node) {
-      if (node.coordinates) {
-        const { angle } = node;
-        const transform = `rotate(${-angle}deg)`;
-        const styleCoordinates = {
-          transform
-        };
-        return styleCoordinates;
-      }
-      return null;
+      const { angle, preview_style } = node;
+      const transform = `rotate(${-angle}deg)`;
+      const styleCoordinates = {
+        transform,
+        ...preview_style
+      };
+      return styleCoordinates;
+    },
+    setGranChildCircleStyle(node) {
+      const { dot_style = {} } = node;
+      const styleCoordinates = {
+        ...dot_style
+      };
+      return styleCoordinates;
     },
     checkIfChanged() {
       console.log("changed!");
@@ -216,88 +211,6 @@ export default {
       };
 
       recursiveChecker(this.selected, [this.structure]);
-
-      // Set coordinates using main circle
-      // https://stackoverflow.com/questions/53608536/vuejs-get-left-top-position-of-element
-      if (this.mainCircleElementReference) {
-        // set coordinates
-        // https://www.w3schools.com/jsref/met_element_getboundingclientrect.asp
-        const mainCircleCoordinates = this.mainCircleElementReference.getBoundingClientRect();
-        if (
-          result_container.children &&
-          result_container.children.length &&
-          document.querySelector(".sub-circle")
-        ) {
-          const childCoordinates = document
-            .querySelector(".sub-circle")
-            .getBoundingClientRect();
-          // first child
-          result_container.children.forEach(child => {
-            const { width: childWidth } = childCoordinates;
-            child.coordinates = {
-              x: 0,
-              y: 0,
-              nodeWidth: childWidth,
-              parentWidth: mainCircleCoordinates.width
-            };
-
-            /** mainCircleCoordinates
-				bottom,
-				height,
-				left,
-				right,
-				top,
-				width,
-				x,
-				y
-			*/
-
-            // Start in Center
-            //   Base X = left + (width / 2 )
-            child.coordinates.x = mainCircleCoordinates.width / 2;
-
-            //   Base Y = top + (height / 2 )
-            child.coordinates.y = mainCircleCoordinates.height / 2;
-
-            console.log({ childCoordinates });
-            /**
-             * Apply Based on angle
-             */
-            const { x: baseX, y: baseY } = child.coordinates;
-
-            const { angle } = child;
-
-            console.log({ baseX, baseY, angle, childWidth });
-
-            // eslint-disable-next-line no-unused-vars
-            const radius =
-              mainCircleCoordinates.width / 2 + (childWidth - childWidth / 4);
-
-            console.log({ radius });
-            // const unit = radius / 10;
-            // minus (x)
-            // if (angle >= 0 && angle <= 180) {
-            //   //   child.coordinates.x = baseX + radius;
-            // }
-
-            // minus (y)
-            // if (angle >= 0 && angle <= 90) {
-            //   //   child.coordinates.y = baseY - angle;
-            // }
-
-            // if (angle === 30) {
-            //   child.coordinates.x =
-            //     baseX + mainCircleCoordinates.width / 2 + childWidth;
-            // }
-            // if (angle === 90) {
-            //   child.coordinates.x =
-            //     baseX + mainCircleCoordinates.width / 2 + childWidth;
-            // }
-          });
-        }
-        // grand child
-      }
-
       return result_container;
     },
 
@@ -363,9 +276,10 @@ export default {
 
 .sub-circle-container {
   position: absolute;
-  width: 120px;
+  width: 170%;
   height: 120px;
-  margin: 0 auto;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
 }
 
