@@ -1,6 +1,5 @@
 <template lang="pug">
 	div
-		h1 Node
 		h4 Label {{label}}
 		div.content
 			slot(name="content")
