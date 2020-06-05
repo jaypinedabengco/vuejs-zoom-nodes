@@ -13,10 +13,11 @@
 					:style="setChildCoordinateViaStyle(node)" )
 					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)") 
 						| {{node.label}}
-					//- Build Preview of child
-					//- div.circle-grandchild-preview-container(v-if="node.children" v-for="(node, j) in node.children")
-					//- 	div.circle-grandchild
-					//- 		| 
+						//- Build Preview of child
+						div.circle-grandchild-preview-container(
+								v-if="node.children" v-for="(node_child, j) in node.children", 
+								:style="{transform: `translate(-50%, -50%) rotate(${node_child.angle}deg)`}")
+							div.circle-grandchild(:style="{transform: `rotate(${node_child.angle}deg)`}")
 						
 			//- div.sub-circle
 			//- 	div Label
@@ -75,7 +76,23 @@ export default {
             component: "sample-two",
             label: "Sample Two",
             angle: 0,
-            children: []
+            children: [
+              {
+                label: "Sample Three Child 1",
+                angle: 90,
+                component: "sample-three-child"
+              },
+              {
+                label: "Sample Three Child 2",
+                angle: 180,
+                component: "sample-three-child"
+              },
+              {
+                label: "Sample Three Child 3",
+                angle: 270,
+                component: "sample-three-child"
+              }
+            ]
           },
           {
             component: "sample-three",
@@ -83,8 +100,18 @@ export default {
             angle: 60,
             children: [
               {
-                label: "Sample Three Child",
+                label: "Sample Three Child 1",
                 angle: 120,
+                component: "sample-three-child"
+              },
+              {
+                label: "Sample Three Child 2",
+                angle: 0,
+                component: "sample-three-child"
+              },
+              {
+                label: "Sample Three Child 3",
+                angle: 90,
                 component: "sample-three-child"
               }
             ]
@@ -104,11 +131,7 @@ export default {
   created() {
     this.getAllComponentNames.forEach(key => {
       this.$set(this.data, key, null);
-	});
-	
-	setInterval(() => {
-		this.structure.children[0].angle += 1;
-	}, 10);
+    });
   },
   mounted() {
     //   https://stackoverflow.com/questions/43531755/using-refs-in-a-computed-property
@@ -136,8 +159,6 @@ export default {
           width: `${width}px`,
           transform
         };
-
-        console.log({ styleCoordinates });
         return styleCoordinates;
       }
       return null;
@@ -145,14 +166,10 @@ export default {
     setChildSubCircleCoordinateViaStyle(node) {
       if (node.coordinates) {
         const { angle } = node;
-
         const transform = `rotate(${-angle}deg)`;
-
         const styleCoordinates = {
           transform
         };
-
-        console.log({ styleCoordinates });
         return styleCoordinates;
       }
       return null;
@@ -358,6 +375,24 @@ export default {
   height: 120px;
   border-radius: 50%;
   border: 3px solid #a78686;
+}
+
+.circle-grandchild-preview-container {
+  position: absolute;
+  width: 150%;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.circle-grandchild {
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  border: 3px solid #a78686;
+  float: right;
 }
 
 .selection-container {
