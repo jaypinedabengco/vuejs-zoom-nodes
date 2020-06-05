@@ -13,6 +13,11 @@
 					:style="setChildCoordinateViaStyle(node)" )
 					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)") 
 						| {{node.label}}
+					//- Build Preview of child
+					//- div.circle-grandchild-preview-container(v-if="node.children" v-for="(node, j) in node.children")
+					//- 	div.circle-grandchild
+					//- 		| 
+						
 			//- div.sub-circle
 			//- 	div Label
 			//- 		pre
@@ -99,7 +104,11 @@ export default {
   created() {
     this.getAllComponentNames.forEach(key => {
       this.$set(this.data, key, null);
-    });
+	});
+	
+	setInterval(() => {
+		this.structure.children[0].angle += 1;
+	}, 10);
   },
   mounted() {
     //   https://stackoverflow.com/questions/43531755/using-refs-in-a-computed-property
