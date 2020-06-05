@@ -5,16 +5,14 @@
 				@mouseover="disableBack = true", 
 				@mouseleave="disableBack = false")
 				component(:is="getSelectedComponent" v-model="nodeData")
-			//- Sub circle & circle within them
-			//- This should be a component?
-			div.sub-circle(
-				v-for="(node, i) in getSelectedComponentDetails.children", :key="i", 
-				@click="selected = node.component", 
-				@mouseover="disableBack = true", 
-				@mouseleave="disableBack = false",
-				:style="setChildCoordinateViaStyle(node)" )
-				div 
-					| {{node.label}}
+				//- Sub circle & circle within them
+				//- This should be a component?
+				div.sub-circle(
+					v-for="(node, i) in getSelectedComponentDetails.children", :key="i", 
+					@click="selected = node.component", 
+					:style="setChildCoordinateViaStyle(node)" )
+					div 
+						| {{node.label}}
 			//- div.sub-circle
 			//- 	div Label
 			//- 		pre
@@ -66,18 +64,22 @@ export default {
       structure: {
         component: "sample-one",
         label: "Sample One",
+        angle: 0,
         children: [
           {
             component: "sample-two",
             label: "Sample Two",
+            angle: 0,
             children: []
           },
           {
             component: "sample-three",
             label: "Sample Three",
+            angle: 60,
             children: [
               {
                 label: "Sample Three Child",
+                angle: 120,
                 component: "sample-three-child"
               }
             ]
@@ -190,19 +192,47 @@ export default {
 			*/
 
             // Start in Center
-            console.log(childCoordinates);
-            // set x
-            //   Base X = left + (width / 2 ) - (childWidth / 2)
+            //   Base X = left + (width / 2 )
             child.coordinates.x =
-              mainCircleCoordinates.left +
-              mainCircleCoordinates.width / 2 -
-              childCoordinates.width / 2;
-            //   childCoordinates.width / 2;
+              mainCircleCoordinates.left + mainCircleCoordinates.width / 2;
 
-            // set y
-            //   Base Y = top + (height / 2 ) - (childHeight + childHeight / 2)
-            child.coordinates.y =
-              mainCircleCoordinates.height / 2 - childCoordinates.height / 2;
+            //   Base Y = top + (height / 2 )
+            child.coordinates.y = mainCircleCoordinates.height / 2;
+
+            console.log({ childCoordinates });
+            /**
+             * Apply Based on angle
+             */
+            const { x: baseX, y: baseY } = child.coordinates;
+            const { width: childWidth } = childCoordinates;
+            const { angle } = child;
+
+            console.log({ baseX, baseY, angle, childWidth });
+
+            // eslint-disable-next-line no-unused-vars
+            const radius =
+              mainCircleCoordinates.width / 2 + (childWidth - childWidth / 4);
+
+			console.log({ radius });
+			const unit = 200;
+            // minus (x)
+            if (angle >= 0 && angle <= 180) {
+              child.coordinates.x = (baseX + radius) - (angle * radius) / unit;
+            }
+
+            // minus (y)
+            if (angle >= 0 && angle <= 90) {
+              child.coordinates.y = baseY - (angle * radius) / unit;
+            }
+
+            // if (angle === 30) {
+            //   child.coordinates.x =
+            //     baseX + mainCircleCoordinates.width / 2 + childWidth;
+            // }
+            // if (angle === 90) {
+            //   child.coordinates.x =
+            //     baseX + mainCircleCoordinates.width / 2 + childWidth;
+            // }
           });
         }
         // grand child
@@ -272,11 +302,12 @@ export default {
 
 .sub-circle {
   position: absolute;
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   border: 3px solid #a78686;
   margin: 0 auto;
+  transform: translate(-50%, -50%);
 }
 
 .selection-container {
