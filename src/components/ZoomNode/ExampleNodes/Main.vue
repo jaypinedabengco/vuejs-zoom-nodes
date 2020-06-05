@@ -10,9 +10,8 @@
 				//- This should be a component?
 				div.sub-circle-container(
 					v-for="(node, i) in getSelectedComponentDetails.children", :key="i", 
-					@click="selected = node.component", 
 					:style="setChildCoordinateViaStyle(node)" )
-					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)") 
+					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)", @click="selected = node.component") 
 						| {{node.label}}
 						//- Build Preview of child
 						div.circle-grandchild-preview-container(
