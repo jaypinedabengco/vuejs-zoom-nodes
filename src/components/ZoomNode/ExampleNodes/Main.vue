@@ -7,11 +7,11 @@
 				component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
 				//- Sub circle & circle within them
 				//- This should be a component?
-				div.sub-circle(
+				div.sub-circle-container(
 					v-for="(node, i) in getSelectedComponentDetails.children", :key="i", 
 					@click="selected = node.component", 
 					:style="setChildCoordinateViaStyle(node)" )
-					div 
+					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)") 
 						| {{node.label}}
 			//- div.sub-circle
 			//- 	div Label
@@ -83,6 +83,11 @@ export default {
                 component: "sample-three-child"
               }
             ]
+          },
+          {
+            label: "Sample Three Child",
+            angle: 32,
+            component: "sample-three-child"
           }
         ]
       },
@@ -108,10 +113,34 @@ export default {
     },
     setChildCoordinateViaStyle(node) {
       if (node.coordinates) {
-        const { x, y } = node.coordinates;
+        const { distance, angle } = node;
+        const { x, y, parentWidth, nodeWidth } = node.coordinates;
+
+        // distance is 100px by default
+        let width = parentWidth + nodeWidth * 2 + (distance || 100);
+
+        const transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
         const styleCoordinates = {
           left: `${x}px`,
-          top: `${y}px`
+          top: `${y}px`,
+          width: `${width}px`,
+          transform
+        };
+
+        console.log({ styleCoordinates });
+        return styleCoordinates;
+      }
+      return null;
+    },
+    setChildSubCircleCoordinateViaStyle(node) {
+      if (node.coordinates) {
+        const { angle } = node;
+
+        const transform = `rotate(${-angle}deg)`;
+
+        const styleCoordinates = {
+          transform
         };
 
         console.log({ styleCoordinates });
@@ -120,8 +149,8 @@ export default {
       return null;
     },
     checkIfChanged() {
-		console.log('changed!');
-	}
+      console.log("changed!");
+    }
   },
   computed: {
     nodeData: {
@@ -178,9 +207,12 @@ export default {
             .getBoundingClientRect();
           // first child
           result_container.children.forEach(child => {
+            const { width: childWidth } = childCoordinates;
             child.coordinates = {
               x: 0,
-              y: 0
+              y: 0,
+              nodeWidth: childWidth,
+              parentWidth: mainCircleCoordinates.width
             };
 
             /** mainCircleCoordinates
@@ -206,7 +238,7 @@ export default {
              * Apply Based on angle
              */
             const { x: baseX, y: baseY } = child.coordinates;
-            const { width: childWidth } = childCoordinates;
+
             const { angle } = child;
 
             console.log({ baseX, baseY, angle, childWidth });
@@ -218,14 +250,14 @@ export default {
             console.log({ radius });
             // const unit = radius / 10;
             // minus (x)
-            if (angle >= 0 && angle <= 180) {
-            //   child.coordinates.x = baseX + radius;
-            }
+            // if (angle >= 0 && angle <= 180) {
+            //   //   child.coordinates.x = baseX + radius;
+            // }
 
             // minus (y)
-            if (angle >= 0 && angle <= 90) {
-            //   child.coordinates.y = baseY - angle;
-            }
+            // if (angle >= 0 && angle <= 90) {
+            //   //   child.coordinates.y = baseY - angle;
+            // }
 
             // if (angle === 30) {
             //   child.coordinates.x =
@@ -303,14 +335,20 @@ export default {
   margin: 0 auto;
 }
 
-.sub-circle {
+.sub-circle-container {
   position: absolute;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  transform: translate(-50%, -50%);
+}
+
+.sub-circle {
+  float: right;
   width: 120px;
   height: 120px;
   border-radius: 50%;
   border: 3px solid #a78686;
-  margin: 0 auto;
-  transform: translate(-50%, -50%);
 }
 
 .selection-container {
