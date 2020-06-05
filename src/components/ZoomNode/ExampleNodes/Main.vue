@@ -265,6 +265,7 @@ export default {
   position: relative;
 }
 .main-circle {
+  z-index: 20;
   position: relative;
   width: 500px;
   height: 500px;
@@ -274,6 +275,7 @@ export default {
 }
 
 .sub-circle-container {
+  z-index: -1;
   position: absolute;
   width: 170%;
   height: 120px;
@@ -283,6 +285,7 @@ export default {
 }
 
 .sub-circle {
+  z-index: 10000;
   float: right;
   width: 120px;
   height: 120px;
