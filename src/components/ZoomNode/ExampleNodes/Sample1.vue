@@ -14,6 +14,9 @@ export default {
   components: {
     node: Node
   },
+  mounted() {
+    console.log('ellox');
+  },
   data() {
     return {};
   }

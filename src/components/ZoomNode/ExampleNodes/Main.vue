@@ -5,12 +5,12 @@
 				@mouseover="disableBack = true", 
 				@mouseleave="disableBack = false", 
 				:style="setViewStyle(getSelectedComponentDetails)")
-				component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
+				//- https://vuejs.org/v2/guide/components-dynamic-async.html#keep-alive-with-Dynamic-Components
+				keep-alive
+					component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
 				//- Sub circle & circle within them
 				//- This should be a component?
-				div.sub-circle-container(
-					v-for="(node, i) in getSelectedComponentDetails.children", :key="i", 
-					:style="setChildCoordinateViaStyle(node)" )
+				div.sub-circle-container(v-for="(node, i) in getSelectedComponentDetails.children", :key="i", :style="setChildCoordinateViaStyle(node)")
 					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)", @click="selected = node.component") 
 						| {{node.label}}
 						//- Build Preview of child
@@ -18,14 +18,6 @@
 								v-if="node.children" v-for="(node_child, j) in node.children", 
 								:style="{transform: `translate(-50%, -50%) rotate(${node_child.angle}deg)`}")
 							div.circle-grandchild(:style="setGranChildCircleStyle(node_child)")
-						
-			//- div.sub-circle
-			//- 	div Label
-			//- 		pre
-			//- div.sub-circle
-			//- 	div Label 2
-			//- div.sub-circle
-			//- 	div Label 3									
 		div.review
 			hr
 			div.selection-container
@@ -166,6 +158,7 @@ export default {
       const styleCoordinates = {
         ...dot_style
       };
+      console.log({ styleCoordinates });
       return styleCoordinates;
     },
     checkIfChanged() {
