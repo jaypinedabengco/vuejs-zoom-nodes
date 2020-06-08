@@ -10,26 +10,23 @@
 					name="selectedNode",  
 					:selectedNodeDetails="getSelectedComponentDetails", 
 					:componentName="getSelectedComponentDetails.component")
-					| 'selectedNode' Slot not used. Selected Node is {{getSelectedComponentDetails.node}}
+					| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
 				//- keep-alive
 				//- 	component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
 				//- Sub circle & circle within them
 				//- This should be a component?
 				div.sub-circle-container(v-for="(node, i) in getSelectedComponentDetails.children", :key="i", :style="setChildCoordinateViaStyle(node)")
-					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)", @click="selected = node.component") 
+					div.sub-circle(
+						@mouseover="disableBack = true",
+						:style="setChildSubCircleCoordinateViaStyle(node)", 
+						@click="onClickChildNode(node)") 
 						p {{node.label}}
 						//- Build Preview of child
 						div.circle-grandchild-preview-container(
 								v-if="node.children" v-for="(node_child, j) in node.children", 
 								:style="{transform: `translate(-50%, -50%) rotate(${node_child.angle}deg)`}")
 							div.circle-grandchild(:style="setGrandChildCircleStyle(node_child)")
-		div.review
-			//- hr
-			//- div.selection-container
-			//- 	ul
-			//- 		li(v-for="(node, i) in getSelectedComponentDetails.children" :key="i", @click="selected = node.component") 
-			//- 			| {{node.label}} - {{node.children && node.children.length ? `(${node.children.length}) child`: `no child`}}
-			//- 	button(v-if="getSelectedParentComponentDetails", @click="selected = getSelectedParentComponentDetails.component") Go Back		
+		div.review(v-if="showDebugUI")
 			hr
 			h3 Component Names
 			pre
@@ -47,9 +44,10 @@
 <script>
 export default {
   props: {
-    // value: {
-    //   requred: true
-    // },
+    showDebugUI: {
+      requred: false,
+      default: false
+    },
     structure: {
       type: Object,
       required: true
@@ -59,28 +57,25 @@ export default {
   created() {
     // set base component as selected
     this.selected = this.structure.component;
-
-    // add sent value to component
-    // this.data = { ...this.value };
-
-    // auto generate if field does not exist.
-    // this.getAllComponentNames.forEach(key => {
-    //   if (!this.data[key]) {
-    //     this.$set(this.data, key, null);
-    //   }
-    // });
   },
   mounted() {},
   data() {
     return {
       selected: "",
-      //   data: {},
       disableBack: false
     };
   },
   methods: {
+    onClickChildNode(node) {
+      console.log({ node });
+      this.disableBack = true;
+      this.selected = node.component;
+      setTimeout(() => {
+        this.disableBack = false;
+      }, 100);
+    },
     back() {
-      if (!this.disableBack && this.getSelectedParentComponentDetails) {
+      if (!this.disableBack && !!this.getSelectedParentComponentDetails) {
         this.selected = this.getSelectedParentComponentDetails.component;
       }
     },
@@ -115,26 +110,10 @@ export default {
       const styleCoordinates = {
         ...dot_style
       };
-      console.log({ styleCoordinates });
       return styleCoordinates;
-    },
-    checkIfChanged() {
-      console.log("changed!");
     }
   },
   computed: {
-    // nodeData: {
-    //   get() {
-    //     console.log("hey!");
-    //     const selectedComponent = this.getSelectedComponent;
-    //     return this.data[selectedComponent];
-    //   },
-    //   set(value) {
-    //     console.log("ho");
-    //     const selectedComponent = this.getSelectedComponent;
-    //     this.data[selectedComponent] = value;
-    //   }
-    // },
     getSelectedComponent() {
       return this.selected;
     },

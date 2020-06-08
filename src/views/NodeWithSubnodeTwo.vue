@@ -70,7 +70,7 @@ export default {
             children: [
               {
                 label: "Sample Three Child 1",
-                angle: 120,
+                angle: 175,
                 component: "sample-five",
                 preview_style: {
                   background: "yellow"
