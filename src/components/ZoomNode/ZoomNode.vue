@@ -1,5 +1,5 @@
 <template lang="pug">
-	div
+	div.wrapper(@click="back")
 		div.container(@click="back")
 			div.main-circle-container(ref="mainCircleRef",
 				:class="{'circle-transition-in': !!selectedSubChildForIn, 'circle-transition-out': !!selectedSubChildForOut }"
@@ -364,14 +364,14 @@ pre {
   }
   100% {
     opacity: 0;
-    transform: scale(4);
+    transform: scale(.1);
   }
 }
 
 @keyframes focusInMainCircleAnimation {
   0% {
     opacity: 0;
-    transform: scale(4);
+    transform: scale(.1);
   }
   100% {
     opacity: 1;
