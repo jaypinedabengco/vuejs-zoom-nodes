@@ -14,20 +14,22 @@
 import Sample1 from "@/components/ZoomNode/ExampleNodes/Sample1";
 import Sample2 from "@/components/ZoomNode/ExampleNodes/Sample2";
 import Sample3 from "@/components/ZoomNode/ExampleNodes/Sample3";
-import Sample3Child from "@/components/ZoomNode/ExampleNodes/Sample3Child";
+import Sample4 from "@/components/ZoomNode/ExampleNodes/Sample3Child";
 
 export default {
   components: {
     "sample-one": Sample1,
     "sample-two": Sample2,
     "sample-three": Sample3,
-    "sample-three-child": Sample3Child
+    "sample-four": Sample4,
+    "sample-five": Sample1,
+    "sample-six": Sample3
   },
   data() {
     return {
-      sample: "",
       data: {
-        "sample-three": "mercedes"
+        "sample-three": "mercedes",
+        "sample-six": "volvo"
       },
       structure: {
         component: "sample-one",
@@ -43,7 +45,7 @@ export default {
           {
             component: "sample-two",
             label: "Sample Two",
-            angle: 0,
+            angle: 60,
             preview_style: {
               background: "blue"
             },
@@ -52,17 +54,23 @@ export default {
             },
             selected_view_style: {
               background: "blue"
-            }
+            },
+            children: [
+              {
+                component: "sample-four",
+                label: "Sample Four"
+              }
+            ]
           },
           {
             component: "sample-three",
             label: "Sample Three",
-            angle: 60,
+            angle: 175,
             children: [
               {
-                label: "Sample Three Child 3",
-                angle: 90,
-                component: "sample-three-child",
+                label: "Sample Three Child 1",
+                angle: 120,
+                component: "sample-five",
                 preview_style: {
                   background: "yellow"
                 },
@@ -71,6 +79,20 @@ export default {
                 },
                 selected_view_style: {
                   background: "yellow"
+                }
+              },
+              {
+                label: "Sample Three Child 2",
+                angle: 259,
+                component: "sample-six",
+                preview_style: {
+                  background: "pink"
+                },
+                dot_style: {
+                  background: "pink"
+                },
+                selected_view_style: {
+                  background: "pink"
                 }
               }
             ]
