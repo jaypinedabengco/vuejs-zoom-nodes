@@ -2,9 +2,10 @@
 	div
 		div.container(@click="back")
 			| {{disableBack}}
-			div.main-circle(ref="mainCircleRef", 
+			div.main-circle(ref="mainCircleRef",
 				@mouseover="disableBack = true", 
 				@mouseleave="disableBack = false", 
+				:class="{'main-circle-focus-out' : !!selectedSubChildForIn, 'main-circle-focus-in': !!selectedSubChildForOut}"				
 				:style="setViewStyle(getSelectedComponentDetails)")
 				//- https://vuejs.org/v2/guide/components-dynamic-async.html#keep-alive-with-Dynamic-Components
 				slot(
@@ -16,10 +17,14 @@
 				//- 	component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
 				//- Sub circle & circle within them
 				//- This should be a component?
-				div.sub-circle-container(v-for="(node, i) in getSelectedComponentDetails.children", :key="i", :style="setChildCoordinateViaStyle(node)")
+				div.sub-circle-container(
+						v-for="(node, i) in getSelectedComponentDetails.children", 
+						:key="i", 
+						:style="setChildCoordinateViaStyle(node)")
 					div.sub-circle(
 						@mouseover="disableBack = true",
 						:style="setChildSubCircleCoordinateViaStyle(node)", 
+						:class="{'selected-focus-in-circle' : node.component == selectedSubChildForIn, 'selected-focus-out-circle': node.component == selectedSubChildForOut}"
 						@click="onClickChildNode(node)") 
 						p {{node.label}}
 						//- Build Preview of child
@@ -63,21 +68,43 @@ export default {
   data() {
     return {
       selected: "",
-      disableBack: false
+      selectedSubChildForIn: "",
+      selectedSubChildForOut: "",
+      disableBack: false,
+      transitionOngoing: false
     };
   },
   methods: {
     onClickChildNode(node) {
-      console.log({ node });
+      if (this.transitionOngoing) {
+        return;
+      }
+      this.selectedSubChildForIn = node.component;
       this.disableBack = true;
-      this.selected = node.component;
+
+      this.transitionOngoing = true;
       setTimeout(() => {
-        this.disableBack = false;
-      }, 100);
+        this.selected = node.component;
+        this.selectedSubChildForIn = null;
+        this.transitionOngoing = false;
+        setTimeout(() => {
+          this.disableBack = false;
+        }, 100);
+      }, 400);
     },
     back() {
+      if (this.transitionOngoing) {
+        return;
+      }
+
       if (!this.disableBack && !!this.getSelectedParentComponentDetails) {
+        this.transitionOngoing = true;
+        this.selectedSubChildForOut = this.getSelectedComponentDetails.component;
         this.selected = this.getSelectedParentComponentDetails.component;
+        setTimeout(() => {
+          this.transitionOngoing = false;
+          this.selectedSubChildForOut = null;
+        }, 400);
       }
     },
     setViewStyle(node) {
@@ -265,5 +292,75 @@ pre {
   text-align: left;
   width: 500px;
   margin: auto;
+}
+
+.selected-focus-in-circle {
+  position: relative;
+  animation: focusInCircleAnimation .5s ease-out;
+}
+
+.selected-focus-out-circle {
+  position: relative;
+  animation: focusOutCircleAnimation .5s ease-in;
+}
+
+.selected-focus-in-circle > *,
+.selected-focus-out-circle > * {
+  display: none;
+}
+
+.main-circle-focus-out {
+  animation: focusOutMainCircleAnimation 8s;
+}
+
+.main-circle-focus-in {
+  animation: focusInMainCircleAnimation 8s;
+}
+
+.main-circle.main-circle-focus-out .content,
+.main-circle.main-circle-focus-in .content {
+  display: none!important;
+}
+
+@keyframes focusInCircleAnimation {
+  0% {
+    right: 0%;
+    opacity: 1;
+  }
+  100% {
+    right: 40%;
+    opacity: 0;
+    transform: scale(4);
+  }
+}
+
+@keyframes focusOutCircleAnimation {
+  0% {
+    right: 40%;
+    opacity: 0;
+    transform: scale(4);
+  }
+  100% {
+    right: 0%;
+    opacity: 1;
+  }
+}
+
+@keyframes focusOutMainCircleAnimation {
+  /* 0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  } */
+}
+
+@keyframes focusInMainCircleAnimation {
+  /* 0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  } */
 }
 </style>
