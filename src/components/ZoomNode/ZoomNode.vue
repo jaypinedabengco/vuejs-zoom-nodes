@@ -1,7 +1,6 @@
 <template lang="pug">
 	div
 		div.container(@click="back")
-			| {{disableBack}}
 			div.main-circle-container(ref="mainCircleRef",
 				:class="{'circle-transition-in': !!selectedSubChildForIn, 'circle-transition-out': !!selectedSubChildForOut }"
 				@mouseover="disableBack = true", 
@@ -55,12 +54,14 @@ export default {
     },
     structure: {
       type: Object,
+      // TODO: ADD validation of structures
       required: true
     }
   },
   components: {},
   created() {
     // set base component as selected
+    // TODO: Maybe add concept of adding 'UNIQUE' id on structures
     this.selected = this.structure.component;
   },
   mounted() {},
@@ -89,7 +90,7 @@ export default {
         setTimeout(() => {
           this.disableBack = false;
         }, 100);
-      }, 400);
+      }, 300);
     },
     back() {
       if (this.transitionOngoing) {
@@ -103,7 +104,7 @@ export default {
         setTimeout(() => {
           this.transitionOngoing = false;
           this.selectedSubChildForOut = null;
-        }, 400);
+        }, 300);
       }
     },
     setViewStyle(node) {
@@ -221,6 +222,8 @@ export default {
 <style scoped>
 .container {
   position: relative;
+  padding: 10% 0;
+  width: 100%;
 }
 .main-circle {
   display: flex;
@@ -304,13 +307,13 @@ pre {
 .selected-focus-in-circle {
   position: relative;
   border-width: 0;
-  animation: focusInCircleAnimation 0.5s ease-out;
+  animation: focusInCircleAnimation 0.4s ease-out;
 }
 
 .selected-focus-out-circle {
   position: relative;
   border-width: 0;
-  animation: focusOutCircleAnimation 0.5s ease-in;
+  animation: focusOutCircleAnimation 0.3s ease-in;
 }
 
 .selected-focus-in-circle > *,
@@ -326,6 +329,7 @@ pre {
 .main-circle-focus-in {
   position: fixed;
   animation: focusInMainCircleAnimation 0.5s;
+  animation-direction: normal;
 }
 
 .main-circle.main-circle-focus-out .content,
