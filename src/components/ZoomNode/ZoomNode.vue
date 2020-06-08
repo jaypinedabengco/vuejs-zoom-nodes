@@ -11,12 +11,9 @@
 				slot(
 					name="selectedNode",  
 					:selectedNodeDetails="getSelectedComponentDetails", 
-					:componentName="getSelectedComponentDetails.component")
+					:componentName="getSelectedComponentDetails.component",
+					:selectedNodeParentDetails="getSelectedParentComponentDetails")
 					| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
-				//- keep-alive
-				//- 	component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
-				//- Sub circle & circle within them
-				//- This should be a component?
 				div.sub-circle-container(
 						v-for="(node, i) in getSelectedComponentDetails.children", 
 						:key="i", 
@@ -296,12 +293,12 @@ pre {
 
 .selected-focus-in-circle {
   position: relative;
-  animation: focusInCircleAnimation .5s ease-out;
+  animation: focusInCircleAnimation 0.5s ease-out;
 }
 
 .selected-focus-out-circle {
   position: relative;
-  animation: focusOutCircleAnimation .5s ease-in;
+  animation: focusOutCircleAnimation 0.5s ease-in;
 }
 
 .selected-focus-in-circle > *,
@@ -319,7 +316,7 @@ pre {
 
 .main-circle.main-circle-focus-out .content,
 .main-circle.main-circle-focus-in .content {
-  display: none!important;
+  display: none !important;
 }
 
 @keyframes focusInCircleAnimation {
