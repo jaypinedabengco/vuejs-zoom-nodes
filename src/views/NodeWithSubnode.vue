@@ -33,12 +33,6 @@ export default {
         component: "sample-one",
         label: "Sample One",
         angle: 0,
-        preview_style: {
-          background: "red"
-        },
-        selected_view_style: {
-          background: "red"
-        },
         children: [
           {
             component: "sample-two",

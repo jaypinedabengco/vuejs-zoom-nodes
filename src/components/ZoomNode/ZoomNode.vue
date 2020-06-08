@@ -17,7 +17,7 @@
 				//- This should be a component?
 				div.sub-circle-container(v-for="(node, i) in getSelectedComponentDetails.children", :key="i", :style="setChildCoordinateViaStyle(node)")
 					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)", @click="selected = node.component") 
-						| {{node.label}}
+						p {{node.label}}
 						//- Build Preview of child
 						div.circle-grandchild-preview-container(
 								v-if="node.children" v-for="(node_child, j) in node.children", 
@@ -222,8 +222,10 @@ export default {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  border: 3px solid #a78686;
+  border: 3px solid #d4cdcd;
   margin: 0 auto;
+
+  background-color: #e6e3e3;
 }
 
 .sub-circle-container {
@@ -242,7 +244,15 @@ export default {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  border: 3px solid #a78686;
+  border: 3px solid #d4cdcd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Set base design */
+  background-color: #e6e3e3;
+  font-weight: bold;
+  color: #000;
 }
 
 .circle-grandchild-preview-container {
@@ -257,9 +267,9 @@ export default {
 .circle-grandchild {
   width: 10px;
   height: 10px;
-  background-color: red;
+  background-color: #e6e3e3;
   border-radius: 50%;
-  border: 3px solid #a78686;
+  border: 2px solid #d4cdcd;
   float: right;
 }
 
