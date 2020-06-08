@@ -2,18 +2,20 @@
 	div
 		div.container(@click="back")
 			| {{disableBack}}
-			div.main-circle(ref="mainCircleRef",
+			div.main-circle-container(ref="mainCircleRef",
+				:class="{'circle-transition-in': !!selectedSubChildForIn, 'circle-transition-out': !!selectedSubChildForOut }"
 				@mouseover="disableBack = true", 
-				@mouseleave="disableBack = false", 
-				:class="{'main-circle-focus-out' : !!selectedSubChildForIn, 'main-circle-focus-in': !!selectedSubChildForOut}"				
-				:style="setViewStyle(getSelectedComponentDetails)")
+				@mouseleave="disableBack = false")
 				//- https://vuejs.org/v2/guide/components-dynamic-async.html#keep-alive-with-Dynamic-Components
-				slot(
-					name="selectedNode",  
-					:selectedNodeDetails="getSelectedComponentDetails", 
-					:componentName="getSelectedComponentDetails.component",
-					:selectedNodeParentDetails="getSelectedParentComponentDetails")
-					| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
+				div.main-circle(
+					:style="setViewStyle(getSelectedComponentDetails)", 
+					:class="{'main-circle-focus-out' : !!selectedSubChildForIn, 'main-circle-focus-in': !!selectedSubChildForOut}")
+					slot(
+						name="selectedNode",  
+						:selectedNodeDetails="getSelectedComponentDetails", 
+						:componentName="getSelectedComponentDetails.component",
+						:selectedNodeParentDetails="getSelectedParentComponentDetails")
+						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
 				div.sub-circle-container(
 						v-for="(node, i) in getSelectedComponentDetails.children", 
 						:key="i", 
@@ -221,11 +223,10 @@ export default {
   position: relative;
 }
 .main-circle {
-  /* z-index: 20; */
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: absolute;
   width: 500px;
   height: 500px;
   border-radius: 50%;
@@ -233,6 +234,15 @@ export default {
   margin: 0 auto;
 
   background-color: #e6e3e3;
+}
+
+.main-circle-container {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0);
 }
 
 .sub-circle-container {
@@ -293,11 +303,13 @@ pre {
 
 .selected-focus-in-circle {
   position: relative;
+  border-width: 0;
   animation: focusInCircleAnimation 0.5s ease-out;
 }
 
 .selected-focus-out-circle {
   position: relative;
+  border-width: 0;
   animation: focusOutCircleAnimation 0.5s ease-in;
 }
 
@@ -307,11 +319,13 @@ pre {
 }
 
 .main-circle-focus-out {
-  animation: focusOutMainCircleAnimation 8s;
+  position: fixed;
+  animation: focusOutMainCircleAnimation 0.5s;
 }
 
 .main-circle-focus-in {
-  animation: focusInMainCircleAnimation 8s;
+  position: fixed;
+  animation: focusInMainCircleAnimation 0.5s;
 }
 
 .main-circle.main-circle-focus-out .content,
@@ -322,11 +336,9 @@ pre {
 @keyframes focusInCircleAnimation {
   0% {
     right: 0%;
-    opacity: 1;
   }
   100% {
     right: 40%;
-    opacity: 0;
     transform: scale(4);
   }
 }
@@ -334,30 +346,32 @@ pre {
 @keyframes focusOutCircleAnimation {
   0% {
     right: 40%;
-    opacity: 0;
     transform: scale(4);
   }
   100% {
     right: 0%;
-    opacity: 1;
   }
 }
 
 @keyframes focusOutMainCircleAnimation {
-  /* 0% {
+  0% {
     opacity: 1;
+    transform: scale(1);
   }
   100% {
     opacity: 0;
-  } */
+    transform: scale(4);
+  }
 }
 
 @keyframes focusInMainCircleAnimation {
-  /* 0% {
+  0% {
     opacity: 0;
+    transform: scale(4);
   }
   100% {
     opacity: 1;
-  } */
+    transform: scale(1);
+  }
 }
 </style>
