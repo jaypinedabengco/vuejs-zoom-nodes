@@ -222,8 +222,8 @@ export default {
 <style scoped>
 .container {
   position: relative;
-  padding: 10% 0;
-  width: 100%;
+  /* padding: 10% 0;
+  width: 100%; */
 }
 .main-circle {
   display: flex;
@@ -313,7 +313,7 @@ pre {
 .selected-focus-out-circle {
   position: relative;
   border-width: 0;
-  animation: focusOutCircleAnimation 0.3s ease-in;
+  animation: focusOutCircleAnimation 0.3s ease-out;
 }
 
 .selected-focus-in-circle > *,
