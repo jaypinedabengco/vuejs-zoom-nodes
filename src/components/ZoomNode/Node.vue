@@ -1,7 +1,7 @@
 <template lang="pug">
 	div
-		h4 Label {{label}}
 		div.content
+			h1 {{label}}
 			slot(name="content")
 				| No Content			
 </template>
