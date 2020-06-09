@@ -228,6 +228,12 @@ export default {
   /* padding: 10% 0;
   width: 100%; */
 }
+
+.wrapper {
+  position: relative;
+  padding: 10% 0;
+}
+
 .wrapper.back-is-valid {
   cursor: zoom-out;
 }
@@ -251,7 +257,8 @@ export default {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  margin: 0 auto;
+  left: 50%;
+  transform: translate(-50%);
   background-color: rgba(255, 255, 255, 0);
 }
 
