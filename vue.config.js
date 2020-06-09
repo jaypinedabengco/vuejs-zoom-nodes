@@ -1,4 +1,11 @@
+
+let publicPath = '/';
+
+if (process.env.VUE_APP_BUILD_GITHUB_PAGE) {
+	publicPath = '/vuejs-zoom-nodes/'
+}
+
 module.exports = {
-	publicPath: process.env.NODE_ENV === 'production' ? '/vuejs-zoom-nodes/' : '/',
+	publicPath,
 	outputDir: 'docs',
 }
