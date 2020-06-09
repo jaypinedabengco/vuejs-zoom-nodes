@@ -4,7 +4,7 @@
 		hr
 		h1 Test
 		z-zoom-node(:structure="structure")
-			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
+			template(v-slot:selectedNode="{selectedNodeDetails, componentName}")
 				keep-alive
 					component(:is="componentName", v-model="data[componentName]")
 
@@ -33,12 +33,6 @@ export default {
         component: "sample-one",
         label: "Sample One",
         angle: 0,
-        preview_style: {
-          background: "red"
-        },
-        selected_view_style: {
-          background: "red"
-        },
         children: [
           {
             component: "sample-two",

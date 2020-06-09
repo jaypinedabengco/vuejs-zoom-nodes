@@ -58,18 +58,19 @@ export default {
             children: [
               {
                 component: "sample-four",
-                label: "Sample Four"
+                label: "Sample Four",
+                angle: 20
               }
             ]
           },
           {
             component: "sample-three",
-            label: "Sample Three",
+            label: "Sample Three X",
             angle: 175,
             children: [
               {
                 label: "Sample Three Child 1",
-                angle: 120,
+                angle: 175,
                 component: "sample-five",
                 preview_style: {
                   background: "yellow"
@@ -86,9 +87,6 @@ export default {
                 angle: 259,
                 component: "sample-six",
                 preview_style: {
-                  background: "pink"
-                },
-                dot_style: {
                   background: "pink"
                 },
                 selected_view_style: {

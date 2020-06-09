@@ -1,35 +1,36 @@
 <template lang="pug">
-	div
+	div.wrapper(@click="back")
 		div.container(@click="back")
-			div.main-circle(ref="mainCircleRef", 
+			div.main-circle-container(ref="mainCircleRef",
+				:class="{'circle-transition-in': !!selectedSubChildForIn, 'circle-transition-out': !!selectedSubChildForOut }"
 				@mouseover="disableBack = true", 
-				@mouseleave="disableBack = false", 
-				:style="setViewStyle(getSelectedComponentDetails)")
+				@mouseleave="disableBack = false")
 				//- https://vuejs.org/v2/guide/components-dynamic-async.html#keep-alive-with-Dynamic-Components
-				slot(
-					name="selectedNode",  
-					:selectedNodeDetails="getSelectedComponentDetails", 
-					:componentName="getSelectedComponentDetails.component")
-					| 'selectedNode' Slot not used. Selected Node is {{getSelectedComponentDetails.node}}
-				//- keep-alive
-				//- 	component(:is="getSelectedComponent" v-model="nodeData" @change="checkIfChanged")
-				//- Sub circle & circle within them
-				//- This should be a component?
-				div.sub-circle-container(v-for="(node, i) in getSelectedComponentDetails.children", :key="i", :style="setChildCoordinateViaStyle(node)")
-					div.sub-circle(:style="setChildSubCircleCoordinateViaStyle(node)", @click="selected = node.component") 
-						| {{node.label}}
+				div.main-circle(
+					:style="setViewStyle(getSelectedComponentDetails)", 
+					:class="{'main-circle-focus-out' : !!selectedSubChildForIn, 'main-circle-focus-in': !!selectedSubChildForOut}")
+					slot(
+						name="selectedNode",  
+						:selectedNodeDetails="getSelectedComponentDetails", 
+						:componentName="getSelectedComponentDetails.component",
+						:selectedNodeParentDetails="getSelectedParentComponentDetails")
+						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
+				div.sub-circle-container(
+						v-for="(node, i) in getSelectedComponentDetails.children", 
+						:key="i", 
+						:style="setChildCoordinateViaStyle(node)")
+					div.sub-circle(
+						@mouseover="disableBack = true",
+						:style="setChildSubCircleCoordinateViaStyle(node)", 
+						:class="{'selected-focus-in-circle' : node.component == selectedSubChildForIn, 'selected-focus-out-circle': node.component == selectedSubChildForOut}"
+						@click="onClickChildNode(node)") 
+						p {{node.label}}
 						//- Build Preview of child
 						div.circle-grandchild-preview-container(
 								v-if="node.children" v-for="(node_child, j) in node.children", 
 								:style="{transform: `translate(-50%, -50%) rotate(${node_child.angle}deg)`}")
 							div.circle-grandchild(:style="setGrandChildCircleStyle(node_child)")
-		div.review
-			//- hr
-			//- div.selection-container
-			//- 	ul
-			//- 		li(v-for="(node, i) in getSelectedComponentDetails.children" :key="i", @click="selected = node.component") 
-			//- 			| {{node.label}} - {{node.children && node.children.length ? `(${node.children.length}) child`: `no child`}}
-			//- 	button(v-if="getSelectedParentComponentDetails", @click="selected = getSelectedParentComponentDetails.component") Go Back		
+		div.review(v-if="showDebugUI")
 			hr
 			h3 Component Names
 			pre
@@ -47,41 +48,63 @@
 <script>
 export default {
   props: {
-    // value: {
-    //   requred: true
-    // },
+    showDebugUI: {
+      requred: false,
+      default: false
+    },
     structure: {
       type: Object,
+      // TODO: ADD validation of structures
       required: true
     }
   },
   components: {},
   created() {
     // set base component as selected
+    // TODO: Maybe add concept of adding 'UNIQUE' id on structures
     this.selected = this.structure.component;
-
-    // add sent value to component
-    // this.data = { ...this.value };
-
-    // auto generate if field does not exist.
-    // this.getAllComponentNames.forEach(key => {
-    //   if (!this.data[key]) {
-    //     this.$set(this.data, key, null);
-    //   }
-    // });
   },
   mounted() {},
   data() {
     return {
       selected: "",
-      //   data: {},
-      disableBack: false
+      selectedSubChildForIn: "",
+      selectedSubChildForOut: "",
+      disableBack: false,
+      transitionOngoing: false
     };
   },
   methods: {
+    onClickChildNode(node) {
+      if (this.transitionOngoing) {
+        return;
+      }
+      this.selectedSubChildForIn = node.component;
+      this.disableBack = true;
+
+      this.transitionOngoing = true;
+      setTimeout(() => {
+        this.selected = node.component;
+        this.selectedSubChildForIn = null;
+        this.transitionOngoing = false;
+        setTimeout(() => {
+          this.disableBack = false;
+        }, 100);
+      }, 300);
+    },
     back() {
-      if (!this.disableBack && this.getSelectedParentComponentDetails) {
+      if (this.transitionOngoing) {
+        return;
+      }
+
+      if (!this.disableBack && !!this.getSelectedParentComponentDetails) {
+        this.transitionOngoing = true;
+        this.selectedSubChildForOut = this.getSelectedComponentDetails.component;
         this.selected = this.getSelectedParentComponentDetails.component;
+        setTimeout(() => {
+          this.transitionOngoing = false;
+          this.selectedSubChildForOut = null;
+        }, 300);
       }
     },
     setViewStyle(node) {
@@ -115,26 +138,10 @@ export default {
       const styleCoordinates = {
         ...dot_style
       };
-      console.log({ styleCoordinates });
       return styleCoordinates;
-    },
-    checkIfChanged() {
-      console.log("changed!");
     }
   },
   computed: {
-    // nodeData: {
-    //   get() {
-    //     console.log("hey!");
-    //     const selectedComponent = this.getSelectedComponent;
-    //     return this.data[selectedComponent];
-    //   },
-    //   set(value) {
-    //     console.log("ho");
-    //     const selectedComponent = this.getSelectedComponent;
-    //     this.data[selectedComponent] = value;
-    //   }
-    // },
     getSelectedComponent() {
       return this.selected;
     },
@@ -215,19 +222,34 @@ export default {
 <style scoped>
 .container {
   position: relative;
+  /* padding: 10% 0;
+  width: 100%; */
 }
 .main-circle {
-  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  border: 3px solid #d4cdcd;
+  margin: 0 auto;
+
+  background-color: #e6e3e3;
+}
+
+.main-circle-container {
   position: relative;
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  border: 3px solid #a78686;
   margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0);
 }
 
 .sub-circle-container {
-  z-index: -1;
+  visibility: hidden;
   position: absolute;
   width: 170%;
   height: 120px;
@@ -237,12 +259,21 @@ export default {
 }
 
 .sub-circle {
-  z-index: 10000;
+  /* z-index: 10000; */
+  visibility: visible;
   float: right;
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  border: 3px solid #a78686;
+  border: 3px solid #d4cdcd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Set base design */
+  background-color: #e6e3e3;
+  font-weight: bold;
+  color: #000;
 }
 
 .circle-grandchild-preview-container {
@@ -257,9 +288,9 @@ export default {
 .circle-grandchild {
   width: 10px;
   height: 10px;
-  background-color: red;
+  background-color: #e6e3e3;
   border-radius: 50%;
-  border: 3px solid #a78686;
+  border: 2px solid #d4cdcd;
   float: right;
 }
 
@@ -271,5 +302,80 @@ pre {
   text-align: left;
   width: 500px;
   margin: auto;
+}
+
+.selected-focus-in-circle {
+  position: relative;
+  border-width: 0;
+  animation: focusInCircleAnimation 0.4s ease-out;
+}
+
+.selected-focus-out-circle {
+  position: relative;
+  border-width: 0;
+  animation: focusOutCircleAnimation 0.3s ease-out;
+}
+
+.selected-focus-in-circle > *,
+.selected-focus-out-circle > * {
+  display: none;
+}
+
+.main-circle-focus-out {
+  position: fixed;
+  animation: focusOutMainCircleAnimation 0.5s;
+}
+
+.main-circle-focus-in {
+  position: fixed;
+  animation: focusInMainCircleAnimation 0.5s;
+  animation-direction: normal;
+}
+
+.main-circle.main-circle-focus-out .content,
+.main-circle.main-circle-focus-in .content {
+  display: none !important;
+}
+
+@keyframes focusInCircleAnimation {
+  0% {
+    right: 0%;
+  }
+  100% {
+    right: 40%;
+    transform: scale(4);
+  }
+}
+
+@keyframes focusOutCircleAnimation {
+  0% {
+    right: 40%;
+    transform: scale(4);
+  }
+  100% {
+    right: 0%;
+  }
+}
+
+@keyframes focusOutMainCircleAnimation {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(.1);
+  }
+}
+
+@keyframes focusInMainCircleAnimation {
+  0% {
+    opacity: 0;
+    transform: scale(.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
