@@ -8,7 +8,7 @@
 				//- https://vuejs.org/v2/guide/components-dynamic-async.html#keep-alive-with-Dynamic-Components
 				div.main-circle(
 					:style="setViewStyle(getSelectedComponentDetails)", 
-					:class="{'main-circle-focus-out' : !!selectedSubChildForIn, 'main-circle-focus-in': !!selectedSubChildForOut}")
+					:class="{...mainCircleFocusClass}")
 					slot(
 						name="selectedNode",  
 						:selectedNodeDetails="getSelectedComponentDetails", 
@@ -51,6 +51,10 @@ export default {
     showDebugUI: {
       requred: false,
       default: false
+    },
+    mainCircleAnimation: {
+      type: String,
+      default: "ZOOM"
     },
     structure: {
       type: Object,
@@ -142,6 +146,29 @@ export default {
     }
   },
   computed: {
+    mainCircleFocusClass() {
+      // main-circle-zoom-out
+      // main-circle-focus-in
+      let zoomInClass = "main-circle-zoom-in";
+      let zoomOutClass = "main-circle-zoom-out";
+
+      switch (this.mainCircleAnimation) {
+        case "ZOOM":
+          zoomInClass = "main-circle-zoom-in";
+          zoomOutClass = "main-circle-zoom-out";
+          break;
+        case "STACK":
+          zoomInClass = "main-circle-focus-in";
+          zoomOutClass = "main-circle-focus-out";
+          break;
+        default:
+      }
+
+      const classes = {};
+      classes[zoomInClass] = !!this.selectedSubChildForOut;
+      classes[zoomOutClass] = !!this.selectedSubChildForIn;
+      return classes;
+    },
     getSelectedComponent() {
       return this.selected;
     },
@@ -347,6 +374,17 @@ pre {
   animation-direction: normal;
 }
 
+.main-circle-zoom-out {
+  position: fixed;
+  animation: zoomOutMainCircleAnimation 0.5s;
+}
+
+.main-circle-zoom-in {
+  position: fixed;
+  animation: zoomInMainCircleAnimation 0.5s;
+  animation-direction: normal;
+}
+
 .main-circle.main-circle-focus-out .content,
 .main-circle.main-circle-focus-in .content {
   display: none !important;
@@ -387,6 +425,28 @@ pre {
   0% {
     opacity: 0;
     transform: scale(0.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOutMainCircleAnimation {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(4);
+  }
+}
+
+@keyframes zoomInMainCircleAnimation {
+  0% {
+    opacity: 0;
+    transform: scale(4);
   }
   100% {
     opacity: 1;

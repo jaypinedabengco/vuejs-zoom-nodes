@@ -2,9 +2,8 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link>|
-      <router-link to="/node-with-subnode">Node with Subnode</router-link>|
-      <router-link to="/node-with-subnode-2">Node with Subnode 2</router-link>|
-      <router-link to="/component-is">Component Is</router-link>
+      <router-link to="/zoom-effect">Zoom Effect</router-link>|
+      <router-link to="/stack-effect">Stack Effect</router-link>
     </div>
     <router-view />
   </div>

@@ -2,8 +2,7 @@
 	div
 		h2 {{data}}
 		hr
-		h1 Test
-		z-zoom-node(:structure="structure")
+		z-zoom-node(:structure="structure", mainCircleAnimation="STACK")
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
 				keep-alive
 					component(:is="componentName", v-model="data[componentName]")

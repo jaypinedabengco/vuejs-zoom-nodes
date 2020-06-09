@@ -2,7 +2,6 @@
 	div
 		h2 {{data}}
 		hr
-		h1 Test
 		z-zoom-node(:structure="structure")
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName}")
 				keep-alive
