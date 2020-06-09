@@ -4,7 +4,7 @@
 		hr
 		h1 Test
 		z-zoom-node(:structure="structure")
-			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
+			template(v-slot:selectedNode="{selectedNodeDetails, componentName}")
 				keep-alive
 					component(:is="componentName", v-model="data[componentName]")
 
