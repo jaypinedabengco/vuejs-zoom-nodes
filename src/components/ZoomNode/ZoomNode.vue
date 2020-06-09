@@ -1,6 +1,6 @@
 <template lang="pug">
-	div.wrapper(@click="back")
-		div.container(@click="back")
+	div.wrapper(@click="back", :class="{'back-is-valid' : allowBack}")
+		div.container
 			div.main-circle-container(ref="mainCircleRef",
 				:class="{'circle-transition-in': !!selectedSubChildForIn, 'circle-transition-out': !!selectedSubChildForOut }"
 				@mouseover="disableBack = true", 
@@ -145,6 +145,9 @@ export default {
     getSelectedComponent() {
       return this.selected;
     },
+    allowBack() {
+      return !this.disableBack && !!this.getSelectedParentComponentDetails;
+    },
     getSelectedComponentDetails() {
       let result_container = null;
       const recursiveChecker = (component_name, children) => {
@@ -225,6 +228,10 @@ export default {
   /* padding: 10% 0;
   width: 100%; */
 }
+.wrapper.back-is-valid {
+  cursor: zoom-out;
+}
+
 .main-circle {
   display: flex;
   justify-content: center;
@@ -249,10 +256,11 @@ export default {
 }
 
 .sub-circle-container {
+  cursor: zoom-in;
   visibility: hidden;
   position: absolute;
   width: 170%;
-  height: 120px;
+  /* height: 120px; */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -364,14 +372,14 @@ pre {
   }
   100% {
     opacity: 0;
-    transform: scale(.1);
+    transform: scale(0.1);
   }
 }
 
 @keyframes focusInMainCircleAnimation {
   0% {
     opacity: 0;
-    transform: scale(.1);
+    transform: scale(0.1);
   }
   100% {
     opacity: 1;
