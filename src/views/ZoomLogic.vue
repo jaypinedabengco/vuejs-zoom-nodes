@@ -1,14 +1,14 @@
 <template lang="pug">
 	div.wrapper
-		div.container
+		div.container(@click="triggerAnimation")
 			div.main-circle-container
 				div.main-circle(v-if="!animationOngoing")
 				div.sub-circle-container(:style={transform:"translate(-50%, -50%) rotate(90deg)"})
 					div.sub-circle(:style={transform:"rotate(-90deg)"}, :class="selectedCircleClass")
 					//- Formula (+130deg)
 			div.previous-main-circle-preview(v-if="startAnimation", :style={transform:"translate(-50%) rotate(210deg)"})
-				div.main-circle(:class="previewCircleClass")
-		button.animate-button(@click="onClickChangeButton") {{!startAnimation ? 'animate' : zoomIn ? 'Zoom Out' : 'Zoom In'}}
+				div.main-circle(@click="triggerAnimation", :class="previewCircleClass")
+		button.animate-button(@click="triggerAnimation") {{!startAnimation ? 'animate' : zoomIn ? 'Zoom Out' : 'Zoom In'}}
 </template>
 
 <script>
@@ -22,7 +22,7 @@ export default {
     };
   },
   methods: {
-    onClickChangeButton() {
+    triggerAnimation() {
       if (this.animationOngoing) {
         return;
       }
