@@ -3,7 +3,8 @@
     <div id="nav">
       <router-link to="/">Home</router-link>|
       <router-link to="/zoom-effect">Zoom Effect</router-link>|
-      <router-link to="/stack-effect">Stack Effect</router-link>
+      <router-link to="/stack-effect">Stack Effect</router-link>|
+      <router-link to="/zoom-example">Zoom Example</router-link>
     </div>
     <router-view />
   </div>
