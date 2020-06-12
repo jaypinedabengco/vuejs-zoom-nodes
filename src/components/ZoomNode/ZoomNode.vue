@@ -17,6 +17,8 @@
 						:componentName="getSelectedComponentDetails.component",
 						:selectedNodeParentDetails="getSelectedParentComponentDetails")
 						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
+					div(v-if="getSelectedComponentDetails.next", @click="next(getSelectedComponentDetails)")
+						h1 Next						
 				div.sub-circle-container(
 						v-for="(node, i) in getSelectedComponentDetails.children", 
 						:key="i", 
@@ -134,10 +136,29 @@ export default {
         this.disableBack = false;
       }, this.animationTransitionZoomIn);
     },
-    back() {
+    async next(node) {
+      // if node.next does not exists, then do something...
+      if (node.next) {
+        const { component } = node.next;
+
+        // do back first
+        this.disableBack = false;
+        await this.back();
+        this.disableBack = true;
+
+        setTimeout(() => {
+          const componentDetails = this.getComponentDetailsFromStructure(
+            component,
+            this.structure
+          );
+          this.onClickChildNode(componentDetails);
+        }, 300);
+      }
+    },
+    async back() {
       // if animation ongoing then do nothing
       if (this.animationOngoing) {
-        return;
+        return false;
       }
 
       if (this.allowBack) {
@@ -147,16 +168,20 @@ export default {
         this.selected = this.getSelectedParentComponentDetails.component;
         this.animationZoomIn = false; // zoomOut
 
-        setTimeout(() => {
-          // set actual selected
-          this.animationSelectedComponent = this.selected;
+        return new Promise(resolve => {
+          setTimeout(() => {
+            // set actual selected
+            this.animationSelectedComponent = this.selected;
 
-          // cleanup
-          this.animationOngoing = false;
-          this.disableBack = false;
-        }, this.animationTransitionZoomOut);
-        // }, 50);
+            // cleanup
+            this.animationOngoing = false;
+            this.disableBack = false;
+
+            resolve(true);
+          }, this.animationTransitionZoomOut);
+        });
       }
+      return false;
     },
     setViewStyle(node) {
       const { selected_view_style = {} } = node;

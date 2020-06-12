@@ -64,6 +64,9 @@ export default {
             selected_view_style: {
               background: "blue"
             },
+            next: {
+              component: "sample-three"
+            },
             children: [
               {
                 component: "sample-four",
