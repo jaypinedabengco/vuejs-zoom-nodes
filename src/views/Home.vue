@@ -1,8 +1,16 @@
 <template lang="pug">
 	div
 		h2 {{data}}
+		div
+			label Zoom IN Speed 
+			input(v-model="zoomInAnimation", type="number")
+			label &nbsp; in Milliseconds
+		div
+			label Zoom OUT Speed 
+			input(v-model="zoomOutAnimation", type="number")
+			label &nbsp; in Milliseconds			
 		hr
-		z-zoom-node(:structure="structure")
+		z-zoom-node(:structure="structure", :animationTransitionZoomIn="zoomInAnimationInNumber", :animationTransitionZoomOut="zoomOutAnimationInNumber")
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
 				keep-alive
 					component(:is="componentName", v-model="data[componentName]")
@@ -26,6 +34,8 @@ export default {
   },
   data() {
     return {
+      zoomInAnimation: 500,
+      zoomOutAnimation: 500,
       data: {
         "sample-three": "mercedes",
         "sample-six": "volvo"
@@ -97,6 +107,14 @@ export default {
         ]
       }
     };
+  },
+  computed: {
+    zoomInAnimationInNumber() {
+      return parseInt(this.zoomInAnimation);
+    },
+    zoomOutAnimationInNumber() {
+      return parseInt(this.zoomOutAnimation);
+    }
   }
 };
 </script>
