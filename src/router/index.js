@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import Home from '../views/Home.vue'
+import Home from '../views/Home.vue'
 import ZoomLogic from '../views/ZoomLogic'
 import NodeStackEffect from '../views/NodeStackEffect'
 import NodeZoomEffect from '../views/NodeZoomEffect'
@@ -11,7 +11,7 @@ const routes = [
 	{
 		path: '/',
 		name: 'Home',
-		component: ZoomLogic
+		component: Home
 	},
 	{
 		path: '/zoom-effect',
