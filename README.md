@@ -1,5 +1,8 @@
 # vuejs-zoom-nodes
 
+## Demo
+[DEMO](https://jaypinedabengco.github.io/vuejs-zoom-nodes/)
+
 ## Project setup
 ```
 npm install
