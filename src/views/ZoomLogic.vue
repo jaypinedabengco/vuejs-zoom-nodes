@@ -172,7 +172,7 @@ export default {
 
 @keyframes zoomOutPreviousCircle {
   0% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -51%) scale(1);
     opacity: 1;
   }
   100% {
@@ -196,7 +196,7 @@ export default {
     opacity: 0.9;
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -51%) scale(1);
     opacity: 0;
   }
 }

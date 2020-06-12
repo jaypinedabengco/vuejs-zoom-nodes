@@ -51,6 +51,15 @@ export default {
             component: "sample-three",
             label: "Sample Three",
             angle: 60,
+            preview_style: {
+              background: "red"
+            },
+            dot_style: {
+              background: "red"
+            },
+            selected_view_style: {
+              background: "red"
+            },
             children: [
               {
                 label: "Sample Three Child 3",
