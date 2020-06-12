@@ -1,5 +1,5 @@
 <template lang="pug">
-	div.wrapper(@click="back", :class="{'back-is-valid' : allowBack, 'animation-on-going': animationOngoing}")
+	div.wrapper(@click="back", :style="{...cssAnimationSpeed}" :class="{'back-is-valid' : allowBack, 'animation-on-going': animationOngoing}")
 		div.container
 			div.main-circle-container(
 				@mouseover="disableBack = true", 
@@ -55,6 +55,14 @@ export default {
       type: Object,
       // TODO: ADD validation of structures
       required: true
+    },
+    animationTransitionZoomIn: {
+      type: Number,
+      default: 500
+    },
+    animationTransitionZoomOut: {
+      type: Number,
+      default: 500
     }
   },
   components: {},
@@ -73,8 +81,8 @@ export default {
     return {
       selected: null,
       animationOngoing: false,
-      animationTransitionZoomIn: 400, // ms
-      animationTransitionZoomOut: 400, // ms
+    //   animationTransitionZoomIn: 400, // ms
+    //   animationTransitionZoomOut: 600, // ms
       animationZoomIn: true,
       animationSelectedComponent: null,
       //   selectedSubChildComponentForIn: null,
@@ -243,6 +251,22 @@ export default {
    *
    *****************************************************************/
   computed: {
+    cssAnimationSpeed() {
+      // minus -100 millis
+      const delayInMillis = 100;
+
+      // formula (animationTransition + delayInMillis) / 1000
+      const animationZoomInSpeed = `${(this.animationTransitionZoomIn +
+        delayInMillis) /
+        1000}s`; // in seconds
+      const animationZoomOutSpeed = `${(this.animationTransitionZoomOut +
+        delayInMillis) /
+        1000}s`; // in seconds
+      return {
+        "--animationZoomInSpeed": animationZoomInSpeed,
+        "--animationZoomOutSpeed": animationZoomOutSpeed
+      };
+    },
     previewCircleClass() {
       const classes = {
         "animate-previous-circle-zoom-out": false,
@@ -472,22 +496,22 @@ export default {
 
 /* Previous Circle */
 .animate-previous-circle-zoom-out {
-  animation: zoomOutPreviousCircle 0.5s;
+  animation: zoomOutPreviousCircle var(--animationZoomInSpeed);
 }
 
 .animate-previous-circle-zoom-in {
-  animation: zoomInPreviousCircle 0.5s;
+  animation: zoomInPreviousCircle var(--animationZoomOutSpeed);
 }
 
 /* Selected Circle */
 .animate-selected-focus-in-circle {
   position: relative;
-  animation: focusInCircleAnimation 0.5s;
+  animation: focusInCircleAnimation var(--animationZoomInSpeed);
 }
 
 .animate-selected-focus-out-circle {
   position: relative;
-  animation: focusOutCircleAnimation 0.5s;
+  animation: focusOutCircleAnimation var(--animationZoomOutSpeed);
 }
 
 @keyframes zoomOutPreviousCircle {
@@ -535,10 +559,10 @@ export default {
   }
   50% {
     opacity: 0.3;
-  }    
+  }
   75% {
     opacity: 0.6;
-  }      
+  }
   100% {
     border-width: 0.25px;
     right: 45%;
