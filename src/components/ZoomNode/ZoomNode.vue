@@ -73,8 +73,8 @@ export default {
     return {
       selected: null,
       animationOngoing: false,
-      animationTransitionZoomIn: 600, // ms
-      animationTransitionZoomOut: 600, // ms
+      animationTransitionZoomIn: 400, // ms
+      animationTransitionZoomOut: 400, // ms
       animationZoomIn: true,
       animationSelectedComponent: null,
       //   selectedSubChildComponentForIn: null,
@@ -142,7 +142,7 @@ export default {
           // cleanup
           this.animationOngoing = false;
           this.disableBack = false;
-        }, this.animationTransitionZoomIn);
+        }, this.animationTransitionZoomOut);
         // }, 50);
       }
     },
@@ -472,22 +472,22 @@ export default {
 
 /* Previous Circle */
 .animate-previous-circle-zoom-out {
-  animation: zoomOutPreviousCircle 0.7s;
+  animation: zoomOutPreviousCircle 0.5s;
 }
 
 .animate-previous-circle-zoom-in {
-  animation: zoomInPreviousCircle 0.8s;
+  animation: zoomInPreviousCircle 0.5s;
 }
 
 /* Selected Circle */
 .animate-selected-focus-in-circle {
   position: relative;
-  animation: focusInCircleAnimation 0.8s;
+  animation: focusInCircleAnimation 0.5s;
 }
 
 .animate-selected-focus-out-circle {
   position: relative;
-  animation: focusOutCircleAnimation 0.7s;
+  animation: focusOutCircleAnimation 0.5s;
 }
 
 @keyframes zoomOutPreviousCircle {
@@ -510,9 +510,11 @@ export default {
     opacity: 0.4;
   }
   50% {
+    border-width: 15px;
     opacity: 0.6;
   }
   90% {
+    border-width: 6px;
     opacity: 0.9;
   }
   100% {
@@ -528,9 +530,18 @@ export default {
     right: 0%;
     opacity: 0.1;
   }
+  25% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.3;
+  }    
+  75% {
+    opacity: 0.6;
+  }      
   100% {
     border-width: 0.25px;
-    right: 42%;
+    right: 45%;
     transform: scale(4);
     opacity: 0.8;
   }
