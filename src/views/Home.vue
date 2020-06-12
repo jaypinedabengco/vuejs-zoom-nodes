@@ -14,6 +14,8 @@
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
 				keep-alive
 					component(:is="componentName", v-model="data[componentName]")
+			//- template(v-slot:nextButton)
+			//- 	| Overwrite!
 
 </template>
 

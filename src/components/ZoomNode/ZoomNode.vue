@@ -15,10 +15,11 @@
 						name="selectedNode",  
 						:selectedNodeDetails="getSelectedComponentDetails", 
 						:componentName="getSelectedComponentDetails.component",
-						:selectedNodeParentDetails="getSelectedParentComponentDetails")
+						:selectedNodeParentDetails="getSelectedParentComponentDetails",
+						:nextComponent="getSelectedComponentDetails.next")
 						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
 					div.next-button-container(v-if="getSelectedComponentDetails.next", @click="next(getSelectedComponentDetails)")
-						slot(name="nextButton")
+						slot(name="nextButton", :nextComponent="getSelectedComponentDetails.next")
 							div.next-button Next						
 				div.sub-circle-container(
 						v-for="(node, i) in getSelectedComponentDetails.children", 
@@ -70,11 +71,11 @@ export default {
     animationTransitionZoomOut: {
       type: Number,
       default: 500
-	},
+    },
     animationTransitionNext: {
       type: Number,
       default: 200
-    }	
+    }
   },
   components: {},
   created() {
