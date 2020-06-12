@@ -70,8 +70,10 @@ export default {
       animationOngoing: false,
       animationTransitionZoomIn: 600, // ms
       animationTransitionZoomOut: 600, // ms
-      selectedSubChildComponentForIn: null,
-      selectedSubChildComponentForOut: null,
+      animationZoomIn: true,
+      animationSelectedComponent: null,
+      //   selectedSubChildComponentForIn: null,
+      //   selectedSubChildComponentForOut: null,
       disableBack: false
     };
   },
@@ -82,23 +84,23 @@ export default {
    *****************************************************************/
   methods: {
     setChildSubCircleClass(node) {
-      // based on selectedSubChildComponentForIn or selectedSubChildComponentForOut
-
-      const classes = {};
-
       // if animation not ongoing, then disable classes
       if (!this.animationOngoing) {
-        return classes;
+        return {};
       }
 
-      if (node.component === this.selectedSubChildComponentForIn) {
-        classes["animate-selected-focus-in-circle"] = true;
+      if (node.component === this.animationSelectedComponent) {
+        //     classes["animate-selected-focus-in-circle"] = true;
+        //   }
+        //   if (node.component === this.animationSelectedComponent) {
+        //     classes["animate-selected-focus-out-circle"] = true;
+        //   }
+        return {
+          "animate-selected-focus-in-circle": !!this.animationZoomIn,
+          "animate-selected-focus-out-circle": !this.animationZoomIn
+        };
       }
-      if (node.component === this.selectedSubChildComponentForOut) {
-        classes["animate-selected-focus-out-circle"] = true;
-      }
-
-      return classes;
+      return {};
     },
     onClickChildNode(node) {
       // if animation ongoing then do nothing
@@ -107,12 +109,13 @@ export default {
       }
       this.disableBack = true;
       this.animationOngoing = true;
+      this.animationZoomIn = true;
 
-      this.selectedSubChildComponentForIn = null;
+      this.animationSelectedComponent = null;
 
       // Too much set timeout :(
       setTimeout(() => {
-        this.selectedSubChildComponentForIn = node.component;
+        this.animationSelectedComponent = node.component;
         setTimeout(() => {
           // set actual selected
           this.selected = node.component;
@@ -129,8 +132,37 @@ export default {
       }, 50);
     },
     back() {
+      // if animation ongoing then do nothing
+      if (this.animationOngoing) {
+        return;
+      }
+
       if (this.allowBack) {
+        this.disableBack = true;
+        this.animationOngoing = true;
+
         this.selected = this.getSelectedParentComponentDetails.component;
+        this.animationZoomIn = false; // zoomOut
+
+        // this.animationSelectedComponent = null;
+
+        // Too much set timeout :(
+        setTimeout(() => {
+          //   this.animationSelectedComponent = this.getSelectedParentComponentDetails.component;
+          setTimeout(() => {
+            // set actual selected
+            this.animationSelectedComponent = this.selected;
+
+            // cleanup
+            // this.selectedSubChildComponentForIn = null;
+            this.animationOngoing = false;
+
+            // enable back
+            setTimeout(() => {
+              this.disableBack = false;
+            }, 100);
+          }, this.animationTransitionZoomIn);
+        }, 50);
       }
     },
     setViewStyle(node) {
@@ -233,10 +265,17 @@ export default {
     previewCircleClass() {
       const classes = {
         "animate-previous-circle-zoom-out": false,
-        "animate-previous-circle-zoom-in": false
+        "animate-previous-circle-zoom-in": false,
+        "zoomed-out": false
       };
-      if (this.selectedSubChildComponentForIn) {
-        classes["animate-previous-circle-zoom-out"] = true;
+      if (this.animationOngoing && this.animationSelectedComponent) {
+        classes["animate-previous-circle-zoom-out"] = !!this.animationZoomIn;
+        classes["animate-previous-circle-zoom-in"] = !this.animationZoomIn;
+      }
+
+      // if has parent, then apply position part
+      if (!this.animationOngoing && this.getSelectedParentComponentDetails) {
+        classes["zoomed-out"] = true;
       }
 
       return classes;
@@ -249,7 +288,7 @@ export default {
       const style = {};
 
       const selectedComponentDetails = this.getComponentDetailsFromStructure(
-        this.selectedSubChildComponentForIn,
+        this.animationSelectedComponent,
         this.structure
       );
       if (selectedComponentDetails) {
@@ -265,7 +304,7 @@ export default {
     },
     mainCirclePreviewCircleStyle() {
       let componentForPreview = this.getComponentParentDetailsFromStructure(
-        this.selectedSubChildComponentForIn,
+        this.animationSelectedComponent,
         this.structure
       );
 
@@ -432,8 +471,15 @@ export default {
   transform: translate(-50%, -51%);
 }
 
+.previous-main-circle-preview .main-circle.zoomed-out {
+  border-width: 30px;
+  transform: translate(140%, 140%) scale(4);
+  opacity: 0.4;
+}
+
 /* Hide elements on animation */
-.animation-on-going .sub-circle:not(.animate-selected-focus-in-circle),
+.animation-on-going
+  .sub-circle:not(.animate-selected-focus-in-circle):not(.animate-selected-focus-out-circle),
 .animation-on-going .sub-circle *,
 .animation-on-going .main-circle-container .main-circle {
   display: none;
@@ -445,22 +491,22 @@ export default {
 
 /* Previous Circle */
 .animate-previous-circle-zoom-out {
-  animation: zoomOutPreviousCircle 0.6s forwards;
+  animation: zoomOutPreviousCircle 0.7s;
 }
 
 .animate-previous-circle-zoom-in {
-  animation: zoomInPreviousCircle 0.7s forwards;
+  animation: zoomInPreviousCircle 0.8s;
 }
 
 /* Selected Circle */
 .animate-selected-focus-in-circle {
   position: relative;
-  animation: focusInCircleAnimation 0.6s;
+  animation: focusInCircleAnimation 0.7s;
 }
 
 .animate-selected-focus-out-circle {
   position: relative;
-  animation: focusOutCircleAnimation 0.6s;
+  animation: focusOutCircleAnimation 0.7s;
 }
 
 @keyframes zoomOutPreviousCircle {
@@ -470,7 +516,7 @@ export default {
   }
   100% {
     border-width: 30px;
-    transform: translate(150%, 150%) scale(4);
+    transform: translate(140%, 140%) scale(4);
     opacity: 0.4;
   }
 }
@@ -479,7 +525,7 @@ export default {
 @keyframes zoomInPreviousCircle {
   0% {
     border-width: 30px;
-    transform: translate(150%, 150%) scale(4);
+    transform: translate(140%, 140%) scale(4);
     opacity: 0.4;
   }
   50% {
