@@ -1,5 +1,9 @@
 <template lang="pug">
-	div.wrapper(@click="back", :style="{...cssAnimationSpeed}" :class="{'back-is-valid' : allowBack, 'animation-on-going': animationOngoing}")
+	//- {cssAnimationSpeed} = Add style Variable
+	div.wrapper(
+			@click="back", 
+			:style="{...cssAnimationSpeed}", 
+			:class="{'back-is-valid' : allowBack, 'animation-on-going': animationOngoing}")
 		div.container
 			div.main-circle-container(
 				@mouseover="disableBack = true", 
@@ -81,8 +85,8 @@ export default {
     return {
       selected: null,
       animationOngoing: false,
-    //   animationTransitionZoomIn: 400, // ms
-    //   animationTransitionZoomOut: 600, // ms
+      //   animationTransitionZoomIn: 400, // ms
+      //   animationTransitionZoomOut: 600, // ms
       animationZoomIn: true,
       animationSelectedComponent: null,
       //   selectedSubChildComponentForIn: null,
@@ -252,7 +256,6 @@ export default {
    *****************************************************************/
   computed: {
     cssAnimationSpeed() {
-      // minus -100 millis
       const delayInMillis = 100;
 
       // formula (animationTransition + delayInMillis) / 1000
