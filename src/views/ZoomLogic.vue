@@ -3,10 +3,10 @@
 		div.container(@click="triggerAnimation")
 			div.main-circle-container
 				div.main-circle(v-if="!animationOngoing")
-				div.sub-circle-container(:style={transform:"translate(-50%, -50%) rotate(90deg)"})
-					div.sub-circle(:style={transform:"rotate(-90deg)"}, :class="selectedCircleClass")
+				div.sub-circle-container(:style={transform:"translate(-50%, -50%) rotate(0deg)"})
+					div.sub-circle(:style={transform:"rotate(-0deg)"}, :class="selectedCircleClass")
 					//- Formula (+130deg)
-			div.previous-main-circle-preview(v-if="startAnimation", :style={transform:"translate(-50%) rotate(210deg)"})
+			div.previous-main-circle-preview(v-if="startAnimation" :style={transform:"translate(-50%) rotate(130deg)"})
 				div.main-circle(@click="triggerAnimation", :class="previewCircleClass")
 		button.animate-button(@click="triggerAnimation") {{!startAnimation ? 'animate' : zoomIn ? 'Zoom Out' : 'Zoom In'}}
 </template>
@@ -32,7 +32,7 @@ export default {
 
       setTimeout(() => {
         this.animationOngoing = false;
-      }, 1000);
+      }, 600);
     }
   },
   computed: {
@@ -110,11 +110,11 @@ export default {
 
 .previous-main-circle-preview {
   position: absolute;
-  transform: translate(-50%);
+  transform: translate(-50% -50%);
   left: 50%;
   top: 50%;
-  width: 1px;
-  height: 1px;
+  width: 0px;
+  height: 0px;
 }
 
 .sub-circle-container {
@@ -152,33 +152,32 @@ export default {
 
 /* Previous Circle */
 .animate-previous-circle-zoom-out {
-  animation: zoomOutPreviousCircle 1s forwards;
+  animation: zoomOutPreviousCircle 0.6s forwards;
 }
 
 .animate-previous-circle-zoom-in {
-  animation: zoomInPreviousCircle 1s forwards;
+  animation: zoomInPreviousCircle 0.7s forwards;
 }
 
 /* Selected Circle */
 .animate-selected-focus-in-circle {
   position: relative;
-  border-width: 0;
-  animation: focusInCircleAnimation 1s ease-out;
+  animation: focusInCircleAnimation 0.6s;
 }
 
 .animate-selected-focus-out-circle {
   position: relative;
-  border-width: 0;
-  animation: focusOutCircleAnimation .6s ease-out;
+  animation: focusOutCircleAnimation 0.6s;
 }
 
 @keyframes zoomOutPreviousCircle {
   0% {
-    transform: translate(-49%, -54%) scale(1);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
   100% {
-    transform: translate(150%, 150%) scale(4);
+    border-width: 30px;
+    transform: translate(155%, 155%) scale(4);
     opacity: 0.4;
   }
 }
@@ -186,17 +185,18 @@ export default {
 /* Previous Circle */
 @keyframes zoomInPreviousCircle {
   0% {
-    transform: translate(150%, 150%) scale(4);
+    border-width: 30px;
+    transform: translate(155%, 155%) scale(4);
     opacity: 0.4;
   }
   50% {
     opacity: 0.6;
   }
-  99% {
+  90% {
     opacity: 0.9;
   }
   100% {
-    transform: translate(-49%, -54%) scale(1);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
   }
 }
@@ -204,21 +204,25 @@ export default {
 /* Selected Circle */
 @keyframes focusInCircleAnimation {
   0% {
+    border-width: 1px;
     right: 0%;
   }
   100% {
-    right: 40%;
+    border-width: 0.25px;
+    right: 42%;
     transform: scale(4);
   }
 }
 
 @keyframes focusOutCircleAnimation {
   0% {
-    right: 40%;
+    border-width: 0.25px;
+    right: 42%;
     transform: scale(4);
   }
   100% {
     right: 0%;
+    border-width: 1px;
   }
 }
 </style>
