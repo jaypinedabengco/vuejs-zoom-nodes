@@ -14,6 +14,8 @@
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
 				keep-alive
 					component(:is="componentName", v-model="data[componentName]")
+			//- template(v-slot:nextButton)
+			//- 	| Overwrite!
 
 </template>
 
@@ -64,6 +66,9 @@ export default {
             selected_view_style: {
               background: "blue"
             },
+            next: {
+              component: "sample-three"
+            },
             children: [
               {
                 component: "sample-four",
@@ -75,7 +80,10 @@ export default {
           {
             component: "sample-three",
             label: "Sample Three X",
-            angle: 175,
+			angle: 175,
+            next: {
+              component: "sample-two"
+            },			
             children: [
               {
                 label: "Sample Three Child 1",

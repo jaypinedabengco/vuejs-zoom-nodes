@@ -15,8 +15,12 @@
 						name="selectedNode",  
 						:selectedNodeDetails="getSelectedComponentDetails", 
 						:componentName="getSelectedComponentDetails.component",
-						:selectedNodeParentDetails="getSelectedParentComponentDetails")
+						:selectedNodeParentDetails="getSelectedParentComponentDetails",
+						:nextComponent="getSelectedComponentDetails.next")
 						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
+					div.next-button-container(v-if="getSelectedComponentDetails.next", @click="next(getSelectedComponentDetails)")
+						slot(name="nextButton", :nextComponent="getSelectedComponentDetails.next")
+							div.next-button Next						
 				div.sub-circle-container(
 						v-for="(node, i) in getSelectedComponentDetails.children", 
 						:key="i", 
@@ -67,6 +71,10 @@ export default {
     animationTransitionZoomOut: {
       type: Number,
       default: 500
+    },
+    animationTransitionNext: {
+      type: Number,
+      default: 200
     }
   },
   components: {},
@@ -134,10 +142,32 @@ export default {
         this.disableBack = false;
       }, this.animationTransitionZoomIn);
     },
-    back() {
+    async next(node) {
+      // if node.next does not exists, then do something...
+      if (node.next) {
+        const { component } = node.next;
+
+        // do back first
+        // need to manually enable back
+        this.disableBack = false;
+        await this.back();
+        // need to manually disable again
+        this.disableBack = true;
+
+        // 300 millis of animation to just preview selected
+        setTimeout(() => {
+          const componentDetails = this.getComponentDetailsFromStructure(
+            component,
+            this.structure
+          );
+          this.onClickChildNode(componentDetails);
+        }, this.animationTransitionNext);
+      }
+    },
+    async back() {
       // if animation ongoing then do nothing
       if (this.animationOngoing) {
-        return;
+        return false;
       }
 
       if (this.allowBack) {
@@ -147,16 +177,20 @@ export default {
         this.selected = this.getSelectedParentComponentDetails.component;
         this.animationZoomIn = false; // zoomOut
 
-        setTimeout(() => {
-          // set actual selected
-          this.animationSelectedComponent = this.selected;
+        return new Promise(resolve => {
+          setTimeout(() => {
+            // set actual selected
+            this.animationSelectedComponent = this.selected;
 
-          // cleanup
-          this.animationOngoing = false;
-          this.disableBack = false;
-        }, this.animationTransitionZoomOut);
-        // }, 50);
+            // cleanup
+            this.animationOngoing = false;
+            this.disableBack = false;
+
+            resolve(true);
+          }, this.animationTransitionZoomOut);
+        });
       }
+      return false;
     },
     setViewStyle(node) {
       const { selected_view_style = {} } = node;
@@ -461,6 +495,23 @@ export default {
   border-radius: 50%;
   border: 2px solid #d4cdcd;
   float: right;
+}
+
+/**
+	Next 
+ */
+.next-button-container {
+  position: absolute;
+  bottom: 30px;
+}
+
+.next-button-container .next-button {
+  border: 2px solid #d4cdcd;
+  background-color: #fff;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 /**
