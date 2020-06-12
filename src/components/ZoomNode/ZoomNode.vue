@@ -36,6 +36,11 @@
 </template>
 
 <script>
+/**
+ * NOTE: I find the solution, the animation in particular as Messy :(.
+ * Find a way to improve on this, as this will create a nightmare for future developers
+ * when doing debug or additional features. - Jay
+ */
 export default {
   props: {
     structure: {
@@ -90,11 +95,6 @@ export default {
       }
 
       if (node.component === this.animationSelectedComponent) {
-        //     classes["animate-selected-focus-in-circle"] = true;
-        //   }
-        //   if (node.component === this.animationSelectedComponent) {
-        //     classes["animate-selected-focus-out-circle"] = true;
-        //   }
         return {
           "animate-selected-focus-in-circle": !!this.animationZoomIn,
           "animate-selected-focus-out-circle": !this.animationZoomIn
@@ -111,25 +111,16 @@ export default {
       this.animationOngoing = true;
       this.animationZoomIn = true;
 
-      this.animationSelectedComponent = null;
-
-      // Too much set timeout :(
+      // Find a way to not use Timeout
+      this.animationSelectedComponent = node.component;
       setTimeout(() => {
-        this.animationSelectedComponent = node.component;
-        setTimeout(() => {
-          // set actual selected
-          this.selected = node.component;
+        // set actual selected
+        this.selected = node.component;
 
-          // cleanup
-          // this.selectedSubChildComponentForIn = null;
-          this.animationOngoing = false;
-
-          // enable back
-          setTimeout(() => {
-            this.disableBack = false;
-          }, 100);
-        }, this.animationTransitionZoomIn);
-      }, 50);
+        // cleanup
+        this.animationOngoing = false;
+        this.disableBack = false;
+      }, this.animationTransitionZoomIn);
     },
     back() {
       // if animation ongoing then do nothing
@@ -144,25 +135,15 @@ export default {
         this.selected = this.getSelectedParentComponentDetails.component;
         this.animationZoomIn = false; // zoomOut
 
-        // this.animationSelectedComponent = null;
-
-        // Too much set timeout :(
         setTimeout(() => {
-          //   this.animationSelectedComponent = this.getSelectedParentComponentDetails.component;
-          setTimeout(() => {
-            // set actual selected
-            this.animationSelectedComponent = this.selected;
+          // set actual selected
+          this.animationSelectedComponent = this.selected;
 
-            // cleanup
-            // this.selectedSubChildComponentForIn = null;
-            this.animationOngoing = false;
-
-            // enable back
-            setTimeout(() => {
-              this.disableBack = false;
-            }, 100);
-          }, this.animationTransitionZoomIn);
-        }, 50);
+          // cleanup
+          this.animationOngoing = false;
+          this.disableBack = false;
+        }, this.animationTransitionZoomIn);
+        // }, 50);
       }
     },
     setViewStyle(node) {
@@ -501,7 +482,7 @@ export default {
 /* Selected Circle */
 .animate-selected-focus-in-circle {
   position: relative;
-  animation: focusInCircleAnimation 0.7s;
+  animation: focusInCircleAnimation 0.8s;
 }
 
 .animate-selected-focus-out-circle {
@@ -545,11 +526,13 @@ export default {
   0% {
     border-width: 1px;
     right: 0%;
+    opacity: 0.1;
   }
   100% {
     border-width: 0.25px;
     right: 42%;
     transform: scale(4);
+    opacity: 0.8;
   }
 }
 
@@ -558,10 +541,12 @@ export default {
     border-width: 0.25px;
     right: 42%;
     transform: scale(4);
+    opacity: 0.8;
   }
   100% {
     right: 0%;
     border-width: 1px;
+    opacity: 0.4;
   }
 }
 </style>
