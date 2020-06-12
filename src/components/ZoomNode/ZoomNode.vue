@@ -1,14 +1,12 @@
 <template lang="pug">
-	div.wrapper(@click="back", :class="{'back-is-valid' : allowBack}")
+	div.wrapper(@click="back", :class="{'back-is-valid' : allowBack, 'animation-on-going': animationOngoing}")
 		div.container
-			div.main-circle-container(ref="mainCircleRef",
-				:class="{'circle-transition-in': !!selectedSubChildForIn, 'circle-transition-out': !!selectedSubChildForOut }"
+			div.main-circle-container(
 				@mouseover="disableBack = true", 
 				@mouseleave="disableBack = false")
 				//- https://vuejs.org/v2/guide/components-dynamic-async.html#keep-alive-with-Dynamic-Components
 				div.main-circle(
-					:style="setViewStyle(getSelectedComponentDetails)", 
-					:class="{...mainCircleFocusClass}")
+					:style="setViewStyle(getSelectedComponentDetails)")
 					slot(
 						name="selectedNode",  
 						:selectedNodeDetails="getSelectedComponentDetails", 
@@ -21,8 +19,8 @@
 						:style="setChildCoordinateViaStyle(node)")
 					div.sub-circle(
 						@mouseover="disableBack = true",
-						:style="setChildSubCircleCoordinateViaStyle(node)", 
-						:class="{'selected-focus-in-circle' : node.component == selectedSubChildForIn, 'selected-focus-out-circle': node.component == selectedSubChildForOut}"
+						:style="{...setChildSubCircleCoordinateViaStyle(node)}", 
+						:class="{...setChildSubCircleClass(node)}"
 						@click="onClickChildNode(node)") 
 						p {{node.label}}
 						//- Build Preview of child
@@ -30,33 +28,25 @@
 								v-if="node.children" v-for="(node_child, j) in node.children", 
 								:style="{transform: `translate(-50%, -50%) rotate(${node_child.angle}deg)`}")
 							div.circle-grandchild(:style="setGrandChildCircleStyle(node_child)")
-		div.review(v-if="showDebugUI")
-			hr
-			h3 Component Names
-			pre
-				| {{getAllComponentNames}}
-			hr
-			h3 Target
-			pre
-				| {{getSelectedComponentDetails}}
-			hr
-			h3 Parent
-			pre
-				| {{getSelectedParentComponentDetails}}
+			div.previous-main-circle-preview(v-if="showMainCirclePreview" :style="{...mainCirclePreviewPositionBySelectedNode}")
+				//- Use Parent details, as that is the previous selected.
+				div.main-circle(
+					:style="{...mainCirclePreviewCircleStyle}"
+					:class="{...previewCircleClass}")
 </template>
 
 <script>
 export default {
   props: {
-    showDebugUI: {
-      requred: false,
-      default: false
-    },
-    mainCircleAnimation: {
-      type: String,
-      default: "ZOOM"
-    },
     structure: {
+      /**
+       * - component : (String)
+       * - label: (String)
+       * - angle: (Number)
+       * - preview_style: (Object)
+       * - selected_view_style: (Object)
+       * - dot_style: (Object)
+       */
       type: Object,
       // TODO: ADD validation of structures
       required: true
@@ -69,46 +59,110 @@ export default {
     this.selected = this.structure.component;
   },
   mounted() {},
+  /****************************************************************
+   *
+   * Data
+   *
+   *****************************************************************/
   data() {
     return {
-      selected: "",
-      selectedSubChildForIn: "",
-      selectedSubChildForOut: "",
-      disableBack: false,
-      transitionOngoing: false
+      selected: null,
+      animationOngoing: false,
+      animationTransitionZoomIn: 600, // ms
+      animationTransitionZoomOut: 600, // ms
+      animationZoomIn: true,
+      animationSelectedComponent: null,
+      //   selectedSubChildComponentForIn: null,
+      //   selectedSubChildComponentForOut: null,
+      disableBack: false
     };
   },
+  /****************************************************************
+   *
+   * Methods
+   *
+   *****************************************************************/
   methods: {
+    setChildSubCircleClass(node) {
+      // if animation not ongoing, then disable classes
+      if (!this.animationOngoing) {
+        return {};
+      }
+
+      if (node.component === this.animationSelectedComponent) {
+        //     classes["animate-selected-focus-in-circle"] = true;
+        //   }
+        //   if (node.component === this.animationSelectedComponent) {
+        //     classes["animate-selected-focus-out-circle"] = true;
+        //   }
+        return {
+          "animate-selected-focus-in-circle": !!this.animationZoomIn,
+          "animate-selected-focus-out-circle": !this.animationZoomIn
+        };
+      }
+      return {};
+    },
     onClickChildNode(node) {
-      if (this.transitionOngoing) {
+      // if animation ongoing then do nothing
+      if (this.animationOngoing) {
         return;
       }
-      this.selectedSubChildForIn = node.component;
       this.disableBack = true;
+      this.animationOngoing = true;
+      this.animationZoomIn = true;
 
-      this.transitionOngoing = true;
+      this.animationSelectedComponent = null;
+
+      // Too much set timeout :(
       setTimeout(() => {
-        this.selected = node.component;
-        this.selectedSubChildForIn = null;
-        this.transitionOngoing = false;
+        this.animationSelectedComponent = node.component;
         setTimeout(() => {
-          this.disableBack = false;
-        }, 100);
-      }, 300);
+          // set actual selected
+          this.selected = node.component;
+
+          // cleanup
+          // this.selectedSubChildComponentForIn = null;
+          this.animationOngoing = false;
+
+          // enable back
+          setTimeout(() => {
+            this.disableBack = false;
+          }, 100);
+        }, this.animationTransitionZoomIn);
+      }, 50);
     },
     back() {
-      if (this.transitionOngoing) {
+      // if animation ongoing then do nothing
+      if (this.animationOngoing) {
         return;
       }
 
-      if (!this.disableBack && !!this.getSelectedParentComponentDetails) {
-        this.transitionOngoing = true;
-        this.selectedSubChildForOut = this.getSelectedComponentDetails.component;
+      if (this.allowBack) {
+        this.disableBack = true;
+        this.animationOngoing = true;
+
         this.selected = this.getSelectedParentComponentDetails.component;
+        this.animationZoomIn = false; // zoomOut
+
+        // this.animationSelectedComponent = null;
+
+        // Too much set timeout :(
         setTimeout(() => {
-          this.transitionOngoing = false;
-          this.selectedSubChildForOut = null;
-        }, 300);
+          //   this.animationSelectedComponent = this.getSelectedParentComponentDetails.component;
+          setTimeout(() => {
+            // set actual selected
+            this.animationSelectedComponent = this.selected;
+
+            // cleanup
+            // this.selectedSubChildComponentForIn = null;
+            this.animationOngoing = false;
+
+            // enable back
+            setTimeout(() => {
+              this.disableBack = false;
+            }, 100);
+          }, this.animationTransitionZoomIn);
+        }, 50);
       }
     },
     setViewStyle(node) {
@@ -143,39 +197,11 @@ export default {
         ...dot_style
       };
       return styleCoordinates;
-    }
-  },
-  computed: {
-    mainCircleFocusClass() {
-      // main-circle-zoom-out
-      // main-circle-focus-in
-      let zoomInClass = "main-circle-zoom-in";
-      let zoomOutClass = "main-circle-zoom-out";
-
-      switch (this.mainCircleAnimation) {
-        case "ZOOM":
-          zoomInClass = "main-circle-zoom-in";
-          zoomOutClass = "main-circle-zoom-out";
-          break;
-        case "STACK":
-          zoomInClass = "main-circle-focus-in";
-          zoomOutClass = "main-circle-focus-out";
-          break;
-        default:
-      }
-
-      const classes = {};
-      classes[zoomInClass] = !!this.selectedSubChildForOut;
-      classes[zoomOutClass] = !!this.selectedSubChildForIn;
-      return classes;
     },
-    getSelectedComponent() {
-      return this.selected;
-    },
-    allowBack() {
-      return !this.disableBack && !!this.getSelectedParentComponentDetails;
-    },
-    getSelectedComponentDetails() {
+    /**
+     *
+     */
+    getComponentDetailsFromStructure(component_name, structure) {
       let result_container = null;
       const recursiveChecker = (component_name, children) => {
         if (!result_container && children instanceof Array) {
@@ -198,11 +224,10 @@ export default {
         }
       };
 
-      recursiveChecker(this.selected, [this.structure]);
+      recursiveChecker(component_name, [structure]);
       return result_container;
     },
-
-    getSelectedParentComponentDetails() {
+    getComponentParentDetailsFromStructure(component_name, structure) {
       let result_container = null;
       const recursiveChecker = (component_name, children) => {
         if (!result_container && children instanceof Array) {
@@ -227,8 +252,96 @@ export default {
         }
       };
 
-      recursiveChecker(this.selected, [this.structure]);
+      recursiveChecker(component_name, [structure]);
       return result_container;
+    }
+  },
+  /****************************************************************
+   *
+   * Computed
+   *
+   *****************************************************************/
+  computed: {
+    previewCircleClass() {
+      const classes = {
+        "animate-previous-circle-zoom-out": false,
+        "animate-previous-circle-zoom-in": false,
+        "zoomed-out": false
+      };
+      if (this.animationOngoing && this.animationSelectedComponent) {
+        classes["animate-previous-circle-zoom-out"] = !!this.animationZoomIn;
+        classes["animate-previous-circle-zoom-in"] = !this.animationZoomIn;
+      }
+
+      // if has parent, then apply position part
+      if (!this.animationOngoing && this.getSelectedParentComponentDetails) {
+        classes["zoomed-out"] = true;
+      }
+
+      return classes;
+    },
+    showMainCirclePreview() {
+      // main circle is show if has a parent.
+      return this.animationOngoing || !!this.getSelectedParentComponentDetails;
+    },
+    mainCirclePreviewPositionBySelectedNode() {
+      const style = {};
+
+      const selectedComponentDetails = this.getComponentDetailsFromStructure(
+        this.animationSelectedComponent,
+        this.structure
+      );
+      if (selectedComponentDetails) {
+        //   transform:"translate(-50%) rotate(130deg)"
+        const BASE_DEGREE_ADJUSMENT = 130; // got this from trial & error, need to research more on how to get proper value.
+        const { angle } = selectedComponentDetails;
+
+        // build transform
+        style["transform"] = `rotate(${angle + BASE_DEGREE_ADJUSMENT}deg)`;
+      }
+
+      return style;
+    },
+    mainCirclePreviewCircleStyle() {
+      let componentForPreview = this.getComponentParentDetailsFromStructure(
+        this.animationSelectedComponent,
+        this.structure
+      );
+
+      // build
+      if (componentForPreview) {
+        const { selected_view_style = {} } = componentForPreview;
+        return selected_view_style;
+      }
+      return {};
+    },
+    getSelectedComponent() {
+      return this.selected;
+    },
+    allowBack() {
+      return !this.disableBack && !!this.getSelectedParentComponentDetails;
+    },
+    /**
+     * Get selected component details from the 'structure'
+     * via the 'selected' data variable.
+     */
+    getSelectedComponentDetails() {
+      const result = this.getComponentDetailsFromStructure(
+        this.selected,
+        this.structure
+      );
+      return result;
+    },
+
+    /**
+     * Get Currently 'selected' component from the 'structure' data parent.
+     * Parent is the 1 level up ^ from current from 'structure'.
+     */
+    getSelectedParentComponentDetails() {
+      return this.getComponentParentDetailsFromStructure(
+        this.selected,
+        this.structure
+      );
     },
 
     getAllComponentNames() {
@@ -259,10 +372,24 @@ export default {
 .wrapper {
   position: relative;
   padding: 10% 0;
+  overflow: hidden;
 }
 
 .wrapper.back-is-valid {
   cursor: zoom-out;
+}
+
+/**
+	Main Circle
+ */
+.main-circle-container {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  left: 50%;
+  transform: translate(-50%);
+  background-color: rgba(255, 255, 255, 0);
 }
 
 .main-circle {
@@ -275,20 +402,12 @@ export default {
   border-radius: 50%;
   border: 3px solid #d4cdcd;
   margin: 0 auto;
-
   background-color: #e6e3e3;
 }
 
-.main-circle-container {
-  position: relative;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  left: 50%;
-  transform: translate(-50%);
-  background-color: rgba(255, 255, 255, 0);
-}
-
+/**
+	Subcircles (Child)
+ */
 .sub-circle-container {
   cursor: zoom-in;
   visibility: hidden;
@@ -336,121 +455,113 @@ export default {
   float: right;
 }
 
-.selection-container {
-  width: 300px;
-  margin: auto;
-}
-pre {
-  text-align: left;
-  width: 500px;
-  margin: auto;
-}
-
-.selected-focus-in-circle {
-  position: relative;
-  border-width: 0;
-  animation: focusInCircleAnimation 0.4s ease-out;
+/**
+	Preview (Giant Circle)
+ */
+.previous-main-circle-preview {
+  position: absolute;
+  transform: translate(-50% -50%);
+  left: 50%;
+  top: 50%;
+  width: 0px;
+  height: 0px;
 }
 
-.selected-focus-out-circle {
-  position: relative;
-  border-width: 0;
-  animation: focusOutCircleAnimation 0.3s ease-out;
+.previous-main-circle-preview .main-circle {
+  transform: translate(-50%, -51%);
 }
 
-.selected-focus-in-circle > *,
-.selected-focus-out-circle > * {
+.previous-main-circle-preview .main-circle.zoomed-out {
+  border-width: 30px;
+  transform: translate(140%, 140%) scale(4);
+  opacity: 0.4;
+}
+
+/* Hide elements on animation */
+.animation-on-going
+  .sub-circle:not(.animate-selected-focus-in-circle):not(.animate-selected-focus-out-circle),
+.animation-on-going .sub-circle *,
+.animation-on-going .main-circle-container .main-circle {
   display: none;
 }
 
-.main-circle-focus-out {
-  position: fixed;
-  animation: focusOutMainCircleAnimation 0.5s;
+/******************************************
+ Animations 
+*******************************************/
+
+/* Previous Circle */
+.animate-previous-circle-zoom-out {
+  animation: zoomOutPreviousCircle 0.7s;
 }
 
-.main-circle-focus-in {
-  position: fixed;
-  animation: focusInMainCircleAnimation 0.5s;
-  animation-direction: normal;
+.animate-previous-circle-zoom-in {
+  animation: zoomInPreviousCircle 0.8s;
 }
 
-.main-circle-zoom-out {
-  position: fixed;
-  animation: zoomOutMainCircleAnimation 0.5s;
+/* Selected Circle */
+.animate-selected-focus-in-circle {
+  position: relative;
+  animation: focusInCircleAnimation 0.7s;
 }
 
-.main-circle-zoom-in {
-  position: fixed;
-  animation: zoomInMainCircleAnimation 0.5s;
-  animation-direction: normal;
+.animate-selected-focus-out-circle {
+  position: relative;
+  animation: focusOutCircleAnimation 0.7s;
 }
 
-.main-circle.main-circle-focus-out .content,
-.main-circle.main-circle-focus-in .content {
-  display: none !important;
+@keyframes zoomOutPreviousCircle {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    border-width: 30px;
+    transform: translate(140%, 140%) scale(4);
+    opacity: 0.4;
+  }
 }
 
+/* Previous Circle */
+@keyframes zoomInPreviousCircle {
+  0% {
+    border-width: 30px;
+    transform: translate(140%, 140%) scale(4);
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Selected Circle */
 @keyframes focusInCircleAnimation {
   0% {
+    border-width: 1px;
     right: 0%;
   }
   100% {
-    right: 40%;
+    border-width: 0.25px;
+    right: 42%;
     transform: scale(4);
   }
 }
 
 @keyframes focusOutCircleAnimation {
   0% {
-    right: 40%;
+    border-width: 0.25px;
+    right: 42%;
     transform: scale(4);
   }
   100% {
     right: 0%;
-  }
-}
-
-@keyframes focusOutMainCircleAnimation {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.1);
-  }
-}
-
-@keyframes focusInMainCircleAnimation {
-  0% {
-    opacity: 0;
-    transform: scale(0.1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes zoomOutMainCircleAnimation {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(4);
-  }
-}
-
-@keyframes zoomInMainCircleAnimation {
-  0% {
-    opacity: 0;
-    transform: scale(4);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
+    border-width: 1px;
   }
 }
 </style>
