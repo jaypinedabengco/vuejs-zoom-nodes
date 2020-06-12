@@ -17,8 +17,9 @@
 						:componentName="getSelectedComponentDetails.component",
 						:selectedNodeParentDetails="getSelectedParentComponentDetails")
 						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
-					div(v-if="getSelectedComponentDetails.next", @click="next(getSelectedComponentDetails)")
-						h1 Next						
+					div.next-button-container(v-if="getSelectedComponentDetails.next", @click="next(getSelectedComponentDetails)")
+						slot(name="nextButton")
+							div.next-button Next						
 				div.sub-circle-container(
 						v-for="(node, i) in getSelectedComponentDetails.children", 
 						:key="i", 
@@ -69,7 +70,11 @@ export default {
     animationTransitionZoomOut: {
       type: Number,
       default: 500
-    }
+	},
+    animationTransitionNext: {
+      type: Number,
+      default: 200
+    }	
   },
   components: {},
   created() {
@@ -148,14 +153,14 @@ export default {
         // need to manually disable again
         this.disableBack = true;
 
-		// 300 millis of animation to just preview selected
+        // 300 millis of animation to just preview selected
         setTimeout(() => {
           const componentDetails = this.getComponentDetailsFromStructure(
             component,
             this.structure
           );
           this.onClickChildNode(componentDetails);
-        }, 100);
+        }, this.animationTransitionNext);
       }
     },
     async back() {
@@ -489,6 +494,23 @@ export default {
   border-radius: 50%;
   border: 2px solid #d4cdcd;
   float: right;
+}
+
+/**
+	Next 
+ */
+.next-button-container {
+  position: absolute;
+  bottom: 30px;
+}
+
+.next-button-container .next-button {
+  border: 2px solid #d4cdcd;
+  background-color: #e7e3e3;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 /**
