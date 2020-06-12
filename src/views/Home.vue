@@ -80,7 +80,10 @@ export default {
           {
             component: "sample-three",
             label: "Sample Three X",
-            angle: 175,
+			angle: 175,
+            next: {
+              component: "sample-two"
+            },			
             children: [
               {
                 label: "Sample Three Child 1",

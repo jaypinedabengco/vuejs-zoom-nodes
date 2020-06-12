@@ -507,7 +507,7 @@ export default {
 
 .next-button-container .next-button {
   border: 2px solid #d4cdcd;
-  background-color: #e7e3e3;
+  background-color: #fff;
   padding: 5px 10px;
   border-radius: 8px;
   cursor: pointer;
