@@ -142,17 +142,20 @@ export default {
         const { component } = node.next;
 
         // do back first
+        // need to manually enable back
         this.disableBack = false;
         await this.back();
+        // need to manually disable again
         this.disableBack = true;
 
+		// 300 millis of animation to just preview selected
         setTimeout(() => {
           const componentDetails = this.getComponentDetailsFromStructure(
             component,
             this.structure
           );
           this.onClickChildNode(componentDetails);
-        }, 300);
+        }, 100);
       }
     },
     async back() {
