@@ -14,6 +14,7 @@
 					slot(
 						name="selectedNode",  
 						:selectedNodeDetails="getSelectedComponentDetails", 
+						:componentId="getSelectedComponentDetails.id",						
 						:componentName="getSelectedComponentDetails.component",
 						:selectedNodeParentDetails="getSelectedParentComponentDetails",
 						:nextComponent="getSelectedComponentDetails.next")
@@ -100,6 +101,14 @@ export default {
             invalidContentDetails.push({
               component,
               reason: "id is required"
+            });
+          }
+
+          // id should be a string
+          if (component.id && typeof component.id !== "string") {
+            invalidContentDetails.push({
+              component,
+              reason: "invalid id, should be a 'string'"
             });
           }
 

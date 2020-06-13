@@ -11,13 +11,13 @@
 			label &nbsp; in Milliseconds			
 		hr
 		z-zoom-node(ref="zoomNode" :structure="structure", :animationTransitionZoomIn="zoomInAnimationInNumber", :animationTransitionZoomOut="zoomOutAnimationInNumber")
-			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
+			template(v-slot:selectedNode="{selectedNodeDetails, componentName, componentId, value}")
 				keep-alive
 					component(
 						:zoomNode="$refs.zoomNode",
 						:structureDetail="selectedNodeDetails",
 						:is="componentName", 
-						v-model="data[componentName]")
+						v-model="data[componentId]")
 			//- template(v-slot:nextButton)
 			//- 	| Overwrite!
 
@@ -46,11 +46,11 @@ export default {
       zoomInAnimation: 500,
       zoomOutAnimation: 500,
       data: {
-        "sample-three": "mercedes",
-        "sample-six": "volvo"
+        "id-6": "mercedes",
+        "id-5": "volvo"
       },
       structure: {
-        id: 1,
+        id: "id-1",
         component: "sample-one",
         label: "Sample One",
         angle: 0,
@@ -62,7 +62,7 @@ export default {
         },
         children: [
           {
-            id: 2,
+            id: "other-2",
             component: "sample-two",
             label: "Sample Two",
             angle: 60,
@@ -76,11 +76,11 @@ export default {
               background: "blue"
             },
             next: {
-              id: 6
+              id: "id-6"
             },
             children: [
               {
-                id: 3,
+                id: "id-3",
                 component: "sample-four",
                 label: "Sample Four",
                 angle: 20
@@ -88,16 +88,16 @@ export default {
             ]
           },
           {
-            id: 6,
+            id: "id-6",
             component: "sample-three",
             label: "Sample Three X",
             angle: 175,
             next: {
-              id: 2
+              id: "other-2"
             },
             children: [
               {
-                id: 4,
+                id: "id-4",
                 label: "Sample Three Child 1",
                 angle: 175,
                 component: "sample-five",
@@ -112,7 +112,7 @@ export default {
                 }
               },
               {
-                id: 5,
+                id: "id-5",
                 label: "Sample Three Child 2",
                 angle: 259,
                 component: "sample-six",
