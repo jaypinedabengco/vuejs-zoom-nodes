@@ -50,6 +50,7 @@ export default {
         "sample-six": "volvo"
       },
       structure: {
+        id: 1,
         component: "sample-one",
         label: "Sample One",
         angle: 0,
@@ -61,6 +62,7 @@ export default {
         },
         children: [
           {
+            id: 2,
             component: "sample-two",
             label: "Sample Two",
             angle: 60,
@@ -74,10 +76,11 @@ export default {
               background: "blue"
             },
             next: {
-              component: "sample-six"
+              id: 6
             },
             children: [
               {
+                id: 3,
                 component: "sample-four",
                 label: "Sample Four",
                 angle: 20
@@ -85,14 +88,16 @@ export default {
             ]
           },
           {
+            id: 6,
             component: "sample-three",
             label: "Sample Three X",
             angle: 175,
             next: {
-              component: "sample-two"
+              id: 2
             },
             children: [
               {
+                id: 4,
                 label: "Sample Three Child 1",
                 angle: 175,
                 component: "sample-five",
@@ -107,6 +112,7 @@ export default {
                 }
               },
               {
+                id: 5,
                 label: "Sample Three Child 2",
                 angle: 259,
                 component: "sample-six",

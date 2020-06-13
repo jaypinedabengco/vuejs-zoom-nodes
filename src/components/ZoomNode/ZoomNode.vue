@@ -17,7 +17,7 @@
 						:componentName="getSelectedComponentDetails.component",
 						:selectedNodeParentDetails="getSelectedParentComponentDetails",
 						:nextComponent="getSelectedComponentDetails.next")
-						| 'selectedNode' Slot not used. Selected Node Component is {{getSelectedComponentDetails.component}}
+						| 'selectedNode' Slot not used. Selected Node Component ID is {{getSelectedComponentDetails.id}}
 					div.next-button-container(v-if="getSelectedComponentDetails.next", @click="next(getSelectedComponentDetails)")
 						slot(name="nextButton", :nextComponent="getSelectedComponentDetails.next")
 							div.next-button Next						
@@ -44,6 +44,14 @@
 </template>
 
 <script>
+// // - Change to a much better approach
+// // - as there is no internet in toyota center right now :(
+// const _uniqueIDGenerator = component_name => {
+//   return `${component_name}-${Math.floor(
+//     Math.random() * Math.random() * Date.now()
+//   )}`;
+// };
+
 /**
  * NOTE: I find the solution, the animation in particular as Messy :(.
  * Find a way to improve on this, as this will create a nightmare for future developers
@@ -62,7 +70,50 @@ export default {
        */
       type: Object,
       // TODO: ADD validation of structures
-      required: true
+      required: true,
+      validator(structure) {
+        const invalidContentDetails = [];
+        const registeredIds = [];
+
+        const recursiveValidator = component => {
+          // should have id
+          if (!component.id) {
+            invalidContentDetails.push({
+              component,
+              reason: "id is required"
+            });
+          }
+
+          // ids should be unique
+          // check if we can move this to a key/value pair, to register
+          // registered component's name
+          if (component.id && registeredIds.indexOf(component.id) > -1) {
+            invalidContentDetails.push({
+              component,
+              reason: `id ${component.id} is used by other components`
+            });
+          }
+          // register Id
+          if (component.id) {
+            registeredIds.push(component.id);
+          }
+
+          if (!!component.children && component.children instanceof Array) {
+            component.children.forEach(component =>
+              recursiveValidator(component)
+            );
+          }
+        };
+
+        recursiveValidator(structure);
+
+        if (invalidContentDetails.length) {
+          console.error("Invalid structure props value", invalidContentDetails);
+          return false;
+        }
+
+        return true;
+      }
     },
     animationTransitionZoomIn: {
       type: Number,
@@ -81,7 +132,11 @@ export default {
   created() {
     // set base component as selected
     // TODO: Maybe add concept of adding 'UNIQUE' id on structures
-    this.selected = this.structure.component;
+
+    // clone structure
+    this.selected = this.structure.id;
+
+    // Generate unique ID
   },
   mounted() {},
   /****************************************************************
@@ -92,11 +147,12 @@ export default {
   data() {
     return {
       selected: null,
+      structureWithIds: {},
       animationOngoing: false,
       //   animationTransitionZoomIn: 400, // ms
       //   animationTransitionZoomOut: 600, // ms
       animationZoomIn: true,
-      animationSelectedComponent: null,
+      animationSelectedComponentId: null,
       //   selectedSubChildComponentForIn: null,
       //   selectedSubChildComponentForOut: null,
       disableBack: false
@@ -108,13 +164,26 @@ export default {
    *
    *****************************************************************/
   methods: {
+    // generateUniqueIDforStructure(structure) {
+    //   const recursiveMethod = component => {
+    //     // add id to component
+    //     // if has child, then add id to children
+    //     component.id = _uniqueIDGenerator(component.component);
+    //     if (!!component.children && component.children instanceof Array) {
+    //       component.children.forEach(component => recursiveMethod(component));
+    //     }
+    //   };
+
+    //   recursiveMethod(structure);
+    //   return structure;
+    // },
     setChildSubCircleClass(node) {
       // if animation not ongoing, then disable classes
       if (!this.animationOngoing) {
         return {};
       }
 
-      if (node.component === this.animationSelectedComponent) {
+      if (node.id === this.animationSelectedComponentId) {
         return {
           "animate-selected-focus-in-circle": !!this.animationZoomIn,
           "animate-selected-focus-out-circle": !this.animationZoomIn
@@ -132,10 +201,10 @@ export default {
       this.animationZoomIn = true;
 
       // Find a way to not use Timeout
-      this.animationSelectedComponent = node.component;
+      this.animationSelectedComponentId = node.id;
       setTimeout(() => {
         // set actual selected
-        this.selected = node.component;
+        this.selected = node.id;
 
         // cleanup
         this.animationOngoing = false;
@@ -144,8 +213,8 @@ export default {
     },
     async next(node) {
       // if node.next does not exists, then do something...
-      if (node.next) {
-        const { component } = node.next;
+      if (node.next && node.next.id) {
+        const { id: componentId } = node.next;
 
         // do back first
         // need to manually enable back
@@ -157,11 +226,13 @@ export default {
         // 300 millis of animation to just preview selected
         setTimeout(() => {
           const componentDetails = this.getComponentDetailsFromStructure(
-            component,
+            componentId,
             this.structure
           );
           this.onClickChildNode(componentDetails);
         }, this.animationTransitionNext);
+      } else {
+        console.warn(`Component has no next && next.id value`, node);
       }
     },
     async back() {
@@ -174,13 +245,13 @@ export default {
         this.disableBack = true;
         this.animationOngoing = true;
 
-        this.selected = this.getSelectedParentComponentDetails.component;
+        this.selected = this.getSelectedParentComponentDetails.id;
         this.animationZoomIn = false; // zoomOut
 
         return new Promise(resolve => {
           setTimeout(() => {
             // set actual selected
-            this.animationSelectedComponent = this.selected;
+            this.animationSelectedComponentId = this.selected;
 
             // cleanup
             this.animationOngoing = false;
@@ -228,12 +299,12 @@ export default {
     /**
      *
      */
-    getComponentDetailsFromStructure(component_name, structure) {
+    getComponentDetailsFromStructure(component_id, structure) {
       let result_container = null;
-      const recursiveChecker = (component_name, children) => {
+      const recursiveChecker = (component_id, children) => {
         if (!result_container && children instanceof Array) {
-          const component = children.filter(({ component }) => {
-            return component === component_name;
+          const component = children.filter(({ id }) => {
+            return id === component_id;
           })[0];
           if (component) {
             result_container = component;
@@ -242,7 +313,7 @@ export default {
           } else {
             children.forEach(component =>
               recursiveChecker(
-                component_name,
+                component_id,
                 component.children,
                 result_container
               )
@@ -251,20 +322,20 @@ export default {
         }
       };
 
-      recursiveChecker(component_name, [structure]);
+      recursiveChecker(component_id, [structure]);
       return result_container;
     },
-    getComponentParentDetailsFromStructure(component_name, structure) {
+    getComponentParentDetailsFromStructure(component_id, structure) {
       let result_container = null;
-      const recursiveChecker = (component_name, children) => {
+      const recursiveChecker = (component_id, children) => {
         if (!result_container && children instanceof Array) {
           // check if 1st degree child has target-component
           const found = children.filter(component => {
             return (
               component.children &&
               component.children.filter(
-                ({ component: child_component_name }) =>
-                  child_component_name === component_name
+                ({ id: child_component_id }) =>
+                  child_component_id === component_id
               ).length
             );
           })[0];
@@ -273,13 +344,13 @@ export default {
             return;
           } else {
             children.forEach(component =>
-              recursiveChecker(component_name, component.children)
+              recursiveChecker(component_id, component.children)
             );
           }
         }
       };
 
-      recursiveChecker(component_name, [structure]);
+      recursiveChecker(component_id, [structure]);
       return result_container;
     }
   },
@@ -310,7 +381,7 @@ export default {
         "animate-previous-circle-zoom-in": false,
         "zoomed-out": false
       };
-      if (this.animationOngoing && this.animationSelectedComponent) {
+      if (this.animationOngoing && this.animationSelectedComponentId) {
         classes["animate-previous-circle-zoom-out"] = !!this.animationZoomIn;
         classes["animate-previous-circle-zoom-in"] = !this.animationZoomIn;
       }
@@ -330,7 +401,7 @@ export default {
       const style = {};
 
       const selectedComponentDetails = this.getComponentDetailsFromStructure(
-        this.animationSelectedComponent,
+        this.animationSelectedComponentId,
         this.structure
       );
       if (selectedComponentDetails) {
@@ -346,7 +417,7 @@ export default {
     },
     mainCirclePreviewCircleStyle() {
       let componentForPreview = this.getComponentParentDetailsFromStructure(
-        this.animationSelectedComponent,
+        this.animationSelectedComponentId,
         this.structure
       );
 
