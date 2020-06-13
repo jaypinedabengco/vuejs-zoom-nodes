@@ -74,7 +74,26 @@ export default {
       validator(structure) {
         const invalidContentDetails = [];
         const registeredIds = [];
+        const allComponentIds = [];
 
+        /**
+         * Recursive Function
+         * - Get component ids
+         * - Will be used on validation
+         */
+        const getComponentIds = components => {
+          if (components instanceof Array) {
+            const extractedIds = components.map(({ id }) => id);
+            allComponentIds.push(...extractedIds.filter(item => !!item));
+            components.forEach(component =>
+              getComponentIds(component.children)
+            );
+          }
+        };
+        getComponentIds([structure]);
+        /**
+         * Recursive Validation
+         */
         const recursiveValidator = component => {
           // should have id
           if (!component.id) {
@@ -96,6 +115,18 @@ export default {
           // register Id
           if (component.id) {
             registeredIds.push(component.id);
+          }
+
+          // Validate if has next & id on next exists on structure
+          if (
+            component.next &&
+            !!component.next.id &&
+            allComponentIds.indexOf(component.next.id) === -1
+          ) {
+            invalidContentDetails.push({
+              component,
+              reason: `id ${component.next.id} used on 'next' does not exist`
+            });
           }
 
           if (!!component.children && component.children instanceof Array) {
