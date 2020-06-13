@@ -76,7 +76,7 @@ export default {
               background: "blue"
             },
             next: {
-              id: 2
+              id: 6
             },
             children: [
               {
