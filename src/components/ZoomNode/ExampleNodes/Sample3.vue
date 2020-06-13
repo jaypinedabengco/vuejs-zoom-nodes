@@ -1,5 +1,5 @@
 <template lang="pug">
-  z-node(label="Sample 2")
+  z-node(label="Sample 3")
     template(v-slot:content)
       select(v-model="mixinsVModel" @change="applyChange")
         option(value="volvo") Volvo

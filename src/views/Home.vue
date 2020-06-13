@@ -10,10 +10,14 @@
 			input(v-model="zoomOutAnimation", type="number")
 			label &nbsp; in Milliseconds			
 		hr
-		z-zoom-node(:structure="structure", :animationTransitionZoomIn="zoomInAnimationInNumber", :animationTransitionZoomOut="zoomOutAnimationInNumber")
+		z-zoom-node(ref="zoomNode" :structure="structure", :animationTransitionZoomIn="zoomInAnimationInNumber", :animationTransitionZoomOut="zoomOutAnimationInNumber")
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName, value}")
 				keep-alive
-					component(:is="componentName", v-model="data[componentName]")
+					component(
+						:zoomNode="$refs.zoomNode",
+						:structureDetail="selectedNodeDetails",
+						:is="componentName", 
+						v-model="data[componentName]")
 			//- template(v-slot:nextButton)
 			//- 	| Overwrite!
 
@@ -33,6 +37,9 @@ export default {
     "sample-four": Sample4,
     "sample-five": Sample1,
     "sample-six": Sample3
+  },
+  mounted() {
+    console.log(this.$refs);
   },
   data() {
     return {
@@ -67,7 +74,7 @@ export default {
               background: "blue"
             },
             next: {
-              component: "sample-three"
+              component: "sample-six"
             },
             children: [
               {
@@ -80,10 +87,10 @@ export default {
           {
             component: "sample-three",
             label: "Sample Three X",
-			angle: 175,
+            angle: 175,
             next: {
               component: "sample-two"
-            },			
+            },
             children: [
               {
                 label: "Sample Three Child 1",
