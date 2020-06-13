@@ -9,7 +9,7 @@ export default {
 		this.mixinsVModel = this.value;
 	},
 	computed: {
-		hasNext() {
+		zoomNodeHasNext() {
 			return !!this.zoomNode &&
 				!!this.structureDetail &&
 				!!this.structureDetail.next &&
@@ -21,7 +21,7 @@ export default {
 			this.$emit("input", this.mixinsVModel);
 			this.$emit("change", this.mixinsVModel);
 		},
-		next() {
+		zoomNodeTriggerNext() {
 			if (!this.zoomNode) {
 				console.error('Next is not possible, \'zoomNode\' not passed on Props.');
 				return;
@@ -37,7 +37,6 @@ export default {
 				return;
 			}
 
-			console.log(this.zoomNode, this.structureDetail);
 			this.zoomNode.next(this.structureDetail);
 		}
 	}

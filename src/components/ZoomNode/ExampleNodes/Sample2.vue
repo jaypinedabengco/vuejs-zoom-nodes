@@ -2,7 +2,7 @@
 	z-node(label="Sample 2")
 		template(v-slot:content)
 			input(v-model="mixinsVModel" @change="applyChange")
-			button(@click="next") customNext
+			button(v-if="zoomNodeHasNext" @click="zoomNodeTriggerNext") customNext
 </template>
 
 <script>
