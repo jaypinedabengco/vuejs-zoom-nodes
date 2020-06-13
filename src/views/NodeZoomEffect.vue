@@ -2,10 +2,14 @@
 	div
 		h2 {{data}}
 		hr
-		z-zoom-node(:structure="structure")
+		z-zoom-node(ref="zoomNode" :structure="structure")
 			template(v-slot:selectedNode="{selectedNodeDetails, componentName}")
 				keep-alive
-					component(:is="componentName", v-model="data[componentName]")
+					component(
+						:zoomNode="$refs.zoomNode",
+						:structureDetail="selectedNodeDetails",
+						:is="componentName", 
+						v-model="data[componentName]")
 
 </template>
 
@@ -29,13 +33,18 @@ export default {
         "sample-three": "mercedes"
       },
       structure: {
+        id: 1,
         component: "sample-one",
         label: "Sample One",
         angle: 0,
         children: [
           {
+            id: 2,
             component: "sample-two",
-            label: "Sample Two",
+			label: "Sample Two",
+			next: {
+				id: 3
+			},
             angle: 0,
             preview_style: {
               background: "blue"
@@ -48,6 +57,7 @@ export default {
             }
           },
           {
+            id: 3,
             component: "sample-three",
             label: "Sample Three",
             angle: 60,
@@ -62,6 +72,7 @@ export default {
             },
             children: [
               {
+                id: 4,
                 label: "Sample Three Child 3",
                 angle: 90,
                 component: "sample-three-child",
